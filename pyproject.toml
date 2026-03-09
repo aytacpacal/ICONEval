@@ -1,0 +1,71 @@
+[project]
+name = "iconeval"
+version = "0.9.0"
+description = "Convenient evaluation of ICON model output with ESMValTool"
+authors = [
+    {name = "Manuel Schlund", email = "manuel.schlund@dlr.de"},
+    {name = "Lisa Bock", email = "lisa.bock@dlr.de"},
+]
+readme = "README.md"
+requires-python = ">=3.12"
+keywords = ["ICON", "ESMValTool", "Earth System Model Evaluation"]
+license = {file = "LICENSE"}
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "fire",
+    "loguru",
+    "prov",
+    "pylatex",
+    "python-swiftclient",
+    "pyyaml",
+    "requests",
+]
+
+[project.optional-dependencies]
+develop = [
+    "pre-commit",
+    "py-markdown-table",
+]
+
+[project.scripts]
+iconeval = "iconeval.main:main"
+plots2pdf = "iconeval.output_handling.plots2pdf:main"
+publish_html = "iconeval.output_handling.publish_html:main"
+
+[tool.setuptools]
+packages = ['iconeval']
+
+[tool.codespell]
+ignore-words-list = "emac,oce,pres"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN401",     # Dynamically typed expressions (typing.Any) are disallowed
+    "C901",       # Function is too complex
+    "DTZ006",     # `datetime.datetime.fromtimestamp()` called without a `tz` argument
+    "DTZ007",     # Naive datetime constructed using `datetime.datetime.strptime()` without %z
+    "G004",       # Logging statement uses f-string"
+    "PLR0912",    # Too many branches
+    "PLR0913",    # Too many arguments in function definition
+    "PLR0915",    # Too many statements
+    "PLW2901",    # `for` loop variable overwritten by assignment target
+    "T201",       # `print` found
+]
+future-annotations = true
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

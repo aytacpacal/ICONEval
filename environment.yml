@@ -1,0 +1,19 @@
+---
+name: iconeval
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - fire
+  - loguru
+  - prov
+  - pylatex
+  - python>=3.10
+  - python-swiftclient
+  - pyyaml
+  - requests
+
+  # develop
+  - pre-commit
+  - py-markdown-table
