@@ -7,6 +7,7 @@
 ---
 
 [![LICENSE](https://img.shields.io/badge/License-Apache%202.0-blue)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/EyringMLClimateGroup/ICONEval/main.svg)](https://results.pre-commit.ci/latest/github/EyringMLClimateGroup/ICONEval/main)
 
 ---
 
