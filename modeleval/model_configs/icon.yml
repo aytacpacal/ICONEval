@@ -1,0 +1,26 @@
+# Model configuration for ICON simulations.
+#
+# This replicates the default auto-detection behavior of the original
+# ICONEval. You typically do NOT need this file since ModelEval will
+# auto-detect ICON simulations when no --model_config is specified.
+#
+# Usage:
+#   modeleval /path/to/my_icon_run --model_config=icon.yml
+
+project: "ICON"
+dataset: "ICON"
+grid_info: "unknown"  # Will be auto-detected from icon_grid_* files if omitted
+
+data_sources:
+  default:
+    rootpath: "{simulation_path}"
+    dirname_template: ""
+    filename_template: "{exp}_{var_type}*.nc"
+  outdata:
+    rootpath: "{simulation_path}"
+    dirname_template: "outdata"
+    filename_template: "{exp}_{var_type}*.nc"
+  output:
+    rootpath: "{simulation_path}"
+    dirname_template: "output"
+    filename_template: "{exp}_{var_type}*.nc"

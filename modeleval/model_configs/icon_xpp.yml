@@ -1,0 +1,24 @@
+# Model configuration for ICON-XPP (Sapphire/Ruby) simulations.
+#
+# Use this for ICON simulations using the XPP (eXtended Physics Package)
+# which uses different variable names than standard ICON-A.
+#
+# Usage:
+#   modeleval /path/to/my_xpp_run --model_config=icon_xpp.yml
+
+project: "ICON"
+dataset: "ICON-XPP"
+
+data_sources:
+  default:
+    rootpath: "{simulation_path}"
+    dirname_template: ""
+    filename_template: "{exp}_{var_type}*.nc"
+  outdata:
+    rootpath: "{simulation_path}"
+    dirname_template: "outdata"
+    filename_template: "{exp}_{var_type}*.nc"
+  output:
+    rootpath: "{simulation_path}"
+    dirname_template: "output"
+    filename_template: "{exp}_{var_type}*.nc"

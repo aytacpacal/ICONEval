@@ -1,0 +1,36 @@
+# Model configuration for CESM (Community Earth System Model) simulations.
+#
+# Adapt the data_sources section to match your CESM output directory
+# structure and file naming conventions.
+#
+# Usage:
+#   modeleval /path/to/my_cesm_case --model_config=cesm.yml
+#
+# Note: CESM output typically uses CMIP-standard variable names in its
+# history files, so the default recipe templates should work without
+# variable mapping.
+
+project: "CESM"
+dataset: "CESM2"
+
+# Extra facets passed to ESMValTool for this model
+extra_facets:
+  frequency: "mon"
+
+data_sources:
+  atm_history:
+    rootpath: "{simulation_path}"
+    dirname_template: "atm/hist"
+    filename_template: "{exp}.cam.h0.*.nc"
+  lnd_history:
+    rootpath: "{simulation_path}"
+    dirname_template: "lnd/hist"
+    filename_template: "{exp}.clm2.h0.*.nc"
+  ocn_history:
+    rootpath: "{simulation_path}"
+    dirname_template: "ocn/hist"
+    filename_template: "{exp}.pop.h.*.nc"
+  ice_history:
+    rootpath: "{simulation_path}"
+    dirname_template: "ice/hist"
+    filename_template: "{exp}.cice.h.*.nc"

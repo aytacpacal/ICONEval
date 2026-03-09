@@ -1,0 +1,15 @@
+# Model configuration for MPAS (Model for Prediction Across Scales) simulations.
+#
+# Adapt the data_sources to match your MPAS output layout.
+#
+# Usage:
+#   modeleval /path/to/my_mpas_run --model_config=mpas.yml
+
+project: "MPAS"
+dataset: "MPAS"
+
+data_sources:
+  default:
+    rootpath: "{simulation_path}"
+    dirname_template: ""
+    filename_template: "*.nc"

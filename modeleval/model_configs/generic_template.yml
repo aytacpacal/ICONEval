@@ -1,0 +1,72 @@
+# Generic model configuration template for ModelEval.
+#
+# Copy this file and customize it for your Earth System Model.
+# Then run ModelEval with:
+#
+#   modeleval /path/to/my_simulation --model_config=my_model.yml
+#
+# The same ESMValTool recipe templates will be used for evaluation,
+# comparing your model output against observational/reanalysis datasets
+# (ERA5, GPCP, etc.) defined in the recipes.
+#
+# ============================================================================
+# REQUIRED FIELDS
+# ============================================================================
+
+# Project name: Used by ESMValTool to identify data loading rules.
+# This should match an ESMValTool project name if your model is already
+# supported (e.g., "ICON", "EMAC", "CESM"), or be a new unique name.
+project: "MyModel"
+
+# Dataset name: Identifier shown in plots and comparisons.
+dataset: "MyModel-v1"
+
+# ============================================================================
+# OPTIONAL FIELDS
+# ============================================================================
+
+# Grid information (free text, shown in HTML summary).
+# grid_info: "1deg"
+
+# Extra facets passed to ESMValTool. Common examples:
+# extra_facets:
+#   frequency: "mon"           # Data frequency
+#   horizontal_grid: "/path/to/grid.nc"  # For unstructured grids
+
+# ============================================================================
+# DATA SOURCES
+# ============================================================================
+#
+# Define where your model output files live and how they are named.
+# You can define multiple data sources for different output components
+# (atmosphere, ocean, land, etc.).
+#
+# Available placeholders in rootpath and filename_template:
+#   {simulation_path}  - The simulation directory passed to modeleval
+#   {exp}              - The experiment name (directory basename)
+#
+# ESMValTool also supports its own placeholders in filename_template
+# and dirname_template (see ESMValTool docs for details):
+#   {short_name}  - CMIP variable short name
+#   {mip}         - MIP table
+#   {frequency}   - Data frequency
+#   {var_type}    - Variable type (ICON-specific)
+
+data_sources:
+  # Simple case: all output in a single directory
+  default:
+    rootpath: "{simulation_path}"
+    dirname_template: ""
+    filename_template: "*.nc"
+
+  # Example: atmosphere output in a subdirectory
+  # atmosphere:
+  #   rootpath: "{simulation_path}"
+  #   dirname_template: "atm/output"
+  #   filename_template: "{exp}_atm_*.nc"
+
+  # Example: ocean output
+  # ocean:
+  #   rootpath: "{simulation_path}"
+  #   dirname_template: "ocn/output"
+  #   filename_template: "{exp}_ocn_*.nc"

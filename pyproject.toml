@@ -1,14 +1,14 @@
 [project]
-name = "iconeval"
-version = "0.9.0"
-description = "Convenient evaluation of ICON model output with ESMValTool"
+name = "modeleval"
+version = "1.0.0"
+description = "Convenient evaluation of Earth System Model output with ESMValTool"
 authors = [
     {name = "Manuel Schlund", email = "manuel.schlund@dlr.de"},
     {name = "Lisa Bock", email = "lisa.bock@dlr.de"},
 ]
 readme = "README.md"
 requires-python = ">=3.12"
-keywords = ["ICON", "ESMValTool", "Earth System Model Evaluation"]
+keywords = ["ESMValTool", "Earth System Model Evaluation", "ICON", "CESM", "MPAS", "Climate"]
 license = {file = "LICENSE"}
 classifiers = [
     "Environment :: Console",
@@ -42,12 +42,22 @@ develop = [
 ]
 
 [project.scripts]
-iconeval = "iconeval.main:main"
-plots2pdf = "iconeval.output_handling.plots2pdf:main"
-publish_html = "iconeval.output_handling.publish_html:main"
+modeleval = "modeleval.main:main"
+# Backward compatibility: keep iconeval as an alias
+iconeval = "modeleval.main:main"
+plots2pdf = "modeleval.output_handling.plots2pdf:main"
+publish_html = "modeleval.output_handling.publish_html:main"
 
 [tool.setuptools]
-packages = ['iconeval']
+packages = ['modeleval', 'modeleval.output_handling']
+
+[tool.setuptools.package-data]
+modeleval = [
+    "esmvaltool_config_template.yml",
+    "recipe_templates/*.yml",
+    "more_recipe_templates/*.yml",
+    "model_configs/*.yml",
+]
 
 [tool.codespell]
 ignore-words-list = "emac,oce,pres"

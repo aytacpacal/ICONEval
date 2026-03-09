@@ -1,0 +1,22 @@
+# Model configuration for EMAC (ECHAM/MESSy Atmospheric Chemistry) simulations.
+#
+# Usage:
+#   modeleval /path/to/my_emac_run --model_config=emac.yml
+
+project: "EMAC"
+dataset: "EMAC"
+
+data_sources:
+  default:
+    rootpath: "{simulation_path}"
+    dirname_template: "{channel}"
+    filename_template: "{exp}*{channel}{postproc_flag}.nc"
+    ignore_warnings:
+      - message: "Ignored formula of unrecognised type: .*"
+        module: "iris"
+      - message: "Ignoring formula terms variable .* referenced by data variable .* via variable .*"
+        module: "iris"
+      - message: "Missing CF-netCDF formula term variable .*, referenced by netCDF variable .*"
+        module: "iris"
+      - message: "NetCDF variable .* contains unknown cell method .*"
+        module: "iris"

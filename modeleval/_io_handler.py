@@ -1,0 +1,420 @@
+"""Module that manages IO directories and files for model output evaluation."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from modeleval._job import Job
+from modeleval._model_config import ModelConfig
+from modeleval._simulation_info import SimulationInfo
+from modeleval._templates import ESMValToolConfigTemplate, RecipeTemplate
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from modeleval._typing import FacetType, OptionValueType
+
+from loguru import logger
+
+logger = logger.opt(colors=True)
+
+
+class ModelEvalIOHandler:
+    """Class that manages IO dirs and files for model output evaluation."""
+
+    PROJECT_ROOT_DIR = Path(__file__).parent.resolve()
+
+    CFG_TEMPLATE = PROJECT_ROOT_DIR / "esmvaltool_config_template.yml"
+    DEFAULT_RECIPE_TEMPLATE_DIR = PROJECT_ROOT_DIR / "recipe_templates"
+
+    DEFAULT_OUTPUT_DIR_NAME = "output_modeleval"
+    OUTPUT_DIR_CONFIG = "config"
+    OUTPUT_DIR_ESMVALTOOL = "esmvaltool_output"
+    OUTPUT_DIR_PDFS = "pdfs"
+    OUTPUT_DIR_RECIPES = "recipes"
+    OUTPUT_DIR_SLURM = "slurm"
+
+    def __init__(
+        self,
+        input_dirs: tuple[str | Path, ...],
+        parent_output_dir: str | Path | None,
+        run_name: str | None,
+        *,
+        model_config: str | Path | None = None,
+    ) -> None:
+        """Initialize class.
+
+        Parameters
+        ----------
+        input_dirs
+            Tuple of input directory paths.
+        parent_output_dir
+            Parent output directory.
+        run_name
+            Name for this evaluation run.
+        model_config
+            Path to model configuration YAML file. If None, uses ICON
+            auto-detection for backward compatibility.
+
+        """
+        # Load model config if provided
+        self._model_config: ModelConfig | None = None
+        if model_config is not None:
+            self._model_config = ModelConfig.from_yaml(Path(model_config))
+            logger.info(
+                f"Model config: <magenta>{self._model_config.project}</magenta> "
+                f"(dataset: {self._model_config.dataset})"
+            )
+
+        self._simulations_info = [
+            SimulationInfo.from_path(p, model_config=self._model_config)
+            for p in self._get_input_dirs(input_dirs)
+        ]
+        if run_name is None:
+            run_name = "_".join([s.exp for s in self.simulations_info])
+        self._run_name = run_name
+
+        logger.info(f"Evaluation name: <magenta>{self.run_name}</magenta>")
+        logger.info("")
+        logger.info("Input directories:")
+        logger.info("------------------")
+        for sim_info in self.simulations_info:
+            logger.info(f"- <magenta>{sim_info.exp}</magenta>")
+            logger.info(f"  (Path: <cyan>{sim_info.path}</cyan>)")
+            project = sim_info.guessed_facets.get("project", "unknown")
+            dataset = sim_info.guessed_facets.get("dataset", "unknown")
+            logger.info(f"  (Project: {project}, Dataset: {dataset})")
+        logger.info("")
+
+        # Set up output directories
+        self._output_dir = self._get_output_dir(parent_output_dir)
+        logger.info(f"Output directory: <cyan>{self.output_dir}</cyan>")
+        logger.debug(f"Configuration: {self.output_dir_config}")
+        logger.debug(f"ESMValTool: {self.output_dir_esmvaltool}")
+        logger.debug(f"PDFs: {self.output_dir_pdfs}")
+        logger.debug(f"Recipes: {self.output_dir_recipes}")
+        logger.debug(f"Slurm: {self.output_dir_slurm}")
+        logger.info("")
+
+    def __repr__(self) -> str:
+        """Return string representation of class instance."""
+        return (
+            f"ModelEvalIOHandler(input_dirs={self.input_dirs!r}, "
+            f"output_dir={self.output_dir!r})"
+        )
+
+    @property
+    def input_dirs(self) -> list[Path]:
+        """Input directory."""
+        return [s.path for s in self.simulations_info]
+
+    @property
+    def model_config(self) -> ModelConfig | None:
+        """Model configuration."""
+        return self._model_config
+
+    @property
+    def output_dir(self) -> Path:
+        """Output directory."""
+        return self._output_dir
+
+    @property
+    def output_dir_config(self) -> Path:
+        """Configuration output directory."""
+        output_dir = self.output_dir / self.OUTPUT_DIR_CONFIG
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir
+
+    @property
+    def output_dir_esmvaltool(self) -> Path:
+        """Output directory."""
+        output_dir = self.output_dir / self.OUTPUT_DIR_ESMVALTOOL
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir
+
+    @property
+    def output_dir_pdfs(self) -> Path:
+        """PDF output directory."""
+        output_dir = self.output_dir / self.OUTPUT_DIR_PDFS
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir
+
+    @property
+    def output_dir_recipes(self) -> Path:
+        """Recipes output directory."""
+        output_dir = self.output_dir / self.OUTPUT_DIR_RECIPES
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir
+
+    @property
+    def output_dir_slurm(self) -> Path:
+        """Slurm output directory."""
+        output_dir = self.output_dir / self.OUTPUT_DIR_SLURM
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir
+
+    @property
+    def run_name(self) -> str:
+        """Evaluation run name."""
+        return self._run_name
+
+    @property
+    def simulations_info(self) -> list[SimulationInfo]:
+        """Information about simulations."""
+        return self._simulations_info
+
+    def get_jobs(
+        self,
+        *,
+        recipe_template_paths: str | Path | Iterable[str | Path] | None,
+        always_use_default_recipe_templates: bool,
+        account: str,
+        dask: bool,
+        esmvaltool_executable: str,
+        srun_executable: str,
+        ignore_recipe_esmvaltool_options: bool,
+        ignore_recipe_srun_options: bool,
+        ignore_recipe_dask_options: bool,
+        additional_esmvaltool_options: dict | None,
+        additional_srun_options: dict | None,
+        additional_dask_options: dict | None,
+        tags: str | list[str] | None,
+        **extra_facets: FacetType,
+    ) -> list[Job]:
+        """Get jobs."""
+        # Get templates
+        esmvaltool_config_template = ESMValToolConfigTemplate(
+            self.CFG_TEMPLATE,
+        )
+        recipe_templates = self._get_recipe_templates(
+            recipe_template_paths,
+            tags,
+            always_use_default_recipe_templates=always_use_default_recipe_templates,
+        )
+
+        logger.debug(
+            f"ESMValTool configuration template: {esmvaltool_config_template.path}",
+        )
+        logger.debug("")
+
+        # Setup jobs
+        jobs: list[Job] = []
+        for recipe_template in recipe_templates:
+            recipe = recipe_template.get_recipe(
+                self.output_dir_recipes / recipe_template.path.name,
+                self.simulations_info,
+                **extra_facets,
+            )
+            dask_config = self._get_dask_config(
+                recipe_template,
+                account,
+                additional_dask_options,
+                dask=dask,
+                ignore_recipe_dask_options=ignore_recipe_dask_options,
+            )
+            esmvaltool_config_dir = self.output_dir_config / recipe_template.name
+            esmvaltool_config_dir.mkdir(parents=True, exist_ok=True)
+            esmvaltool_config_path = esmvaltool_config_dir / "config-user.yml"
+            esmvaltool_config = esmvaltool_config_template.write_config(
+                esmvaltool_config_path,
+                recipe.simulations_info,
+                self.output_dir_esmvaltool,
+                dask_config,
+            )
+            job = Job(
+                recipe=recipe,
+                esmvaltool_config=esmvaltool_config,
+                account=account,
+                esmvaltool_executable=esmvaltool_executable,
+                srun_executable=srun_executable,
+                ignore_recipe_esmvaltool_options=ignore_recipe_esmvaltool_options,
+                ignore_recipe_srun_options=ignore_recipe_srun_options,
+                additional_esmvaltool_options=additional_esmvaltool_options,
+                additional_srun_options=additional_srun_options,
+                output_dir_slurm=self.output_dir_slurm,
+            )
+            jobs.append(job)
+
+        return jobs
+
+    def _get_dask_config(
+        self,
+        recipe_template: RecipeTemplate,
+        account: str,
+        additional_dask_options: dict | None,
+        *,
+        dask: bool,
+        ignore_recipe_dask_options: bool,
+    ) -> dict[str, Any]:
+        """Get ESMValTool dask configuration."""
+        dask_config: dict[str, Any] = {}
+
+        # If default dask scheduler is desired, use empty dask configuration
+        if not dask:
+            return dask_config
+
+        # Remove leading '--' from keys of additional dask options
+        if additional_dask_options is None:
+            additional_dask_options = {}
+        additional_dask_options = {
+            k.removeprefix("--"): v for (k, v) in additional_dask_options.items()
+        }
+
+        # Get user-specific options
+        user_options: dict[str, OptionValueType] = {}
+        user_options.update(additional_dask_options)
+        if not ignore_recipe_dask_options:
+            user_options.update(recipe_template.dask_options)
+
+        # Only use default options when type is distributed.LocalCluster
+        scheduler_type = user_options.get("type", "distributed.LocalCluster")
+        cluster_options: dict[str, OptionValueType] = {}
+        if scheduler_type == "distributed.LocalCluster":
+            cluster_options.update(
+                {
+                    "memory_limit": "3880MB",  # 2x memory per CPU from srun
+                    "n_workers": 8,
+                    "threads_per_worker": 2,
+                    "type": "distributed.LocalCluster",
+                },
+            )
+
+        cluster_options.update(user_options)
+
+        # Update account for SLURMCluster
+        if cluster_options.get("type") == "dask_jobqueue.SLURMCluster":
+            cluster_options["account"] = account
+
+        dask_config.update(
+            {
+                "use": "modeleval",
+                "profiles": {
+                    "modeleval": {
+                        "cluster": cluster_options,
+                    },
+                },
+            },
+        )
+
+        return dask_config
+
+    def _get_input_dirs(self, input_dirs: Iterable[str | Path]) -> list[Path]:
+        """Get input directories."""
+        if not input_dirs:
+            msg = "No input directory given"
+            raise ValueError(msg)
+
+        # Check input directories
+        input_dir_paths: list[Path] = []
+        for input_dir in input_dirs:
+            input_dir = Path(input_dir).expanduser().resolve()
+            if not input_dir.is_dir():
+                msg = f"Input directory '{input_dir}' does not exist"
+                raise NotADirectoryError(msg)
+            input_dir_paths.append(input_dir)
+
+        # Make sure that no duplicate experiments exists
+        exps = [d.name for d in input_dir_paths]
+        if len(exps) != len(set(exps)):
+            msg = (
+                f"Multiple experiments with the same name are not supported, got {exps}"
+            )
+            raise ValueError(msg)
+
+        return input_dir_paths
+
+    def _get_output_dir(self, parent_output_dir: str | Path | None) -> Path:
+        """Get output directory."""
+        now = datetime.now(UTC).strftime("%Y%m%d_%H%M%SUTC")
+        if parent_output_dir is None:
+            parent_output_dir = Path.cwd() / self.DEFAULT_OUTPUT_DIR_NAME
+        output_dir = Path(parent_output_dir) / f"{self.run_name}_{now}"
+        output_dir = output_dir.expanduser().resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir
+
+    def _get_recipe_templates(
+        self,
+        recipe_template_paths: str | Path | Iterable[str | Path] | None,
+        tags: str | list[str] | None,
+        *,
+        always_use_default_recipe_templates: bool,
+    ) -> list[RecipeTemplate]:
+        """Get recipe templates."""
+        logger.debug("Recipe templates:")
+        logger.debug("-----------------")
+        recipe_template_list: list[Path] = []
+        if isinstance(tags, str):
+            tags = [tags]
+
+        # Use default templates if none are specified or
+        # always_use_default_recipe_templates is True
+        if recipe_template_paths is None or always_use_default_recipe_templates:
+            logger.debug(
+                f"Using default recipe templates from directory "
+                f"{self.DEFAULT_RECIPE_TEMPLATE_DIR}",
+            )
+            recipe_template_list.extend(
+                self.DEFAULT_RECIPE_TEMPLATE_DIR.rglob("*.yml"),
+            )
+
+        # Add user-defined recipe templates
+        if isinstance(recipe_template_paths, (str, Path)):
+            recipe_template_paths = [recipe_template_paths]
+        if recipe_template_paths is not None:
+            recipe_template_list.extend(
+                Path(p).expanduser().resolve() for p in recipe_template_paths
+            )
+
+        # Resolve globs and Remove duplicates
+        recipe_template_list = self._resolve_globs(recipe_template_list)
+        recipe_template_list = sorted(set(recipe_template_list))
+
+        # Check if recipe templates exist and filter tags
+        recipe_templates: list[RecipeTemplate] = []
+        for recipe_template_path in recipe_template_list:
+            if not recipe_template_path.is_file():
+                msg = f"No recipe template matching '{recipe_template_path}' found"
+                raise FileNotFoundError(msg)
+            recipe_template = RecipeTemplate(recipe_template_path)
+
+            if tags is not None:
+                for tag in tags:
+                    if tag in recipe_template.tags:
+                        break
+                else:
+                    continue
+
+            recipe_templates.append(recipe_template)
+            logger.debug(f"  - {recipe_template.path}")
+
+        if not recipe_templates:
+            if tags is not None:
+                msg = f"No recipe templates for tags {tags} given"
+            else:
+                msg = "No recipe templates given"
+            raise ValueError(msg)
+
+        logger.debug("")
+
+        return recipe_templates
+
+    @staticmethod
+    def _resolve_globs(paths: Iterable[Path]) -> list[Path]:
+        """Resolve globs in paths."""
+        resolved_paths: list[Path] = []
+
+        for path in paths:
+            glob = list(path.parent.glob(path.name))
+
+            # If a path does not resolve into a valid path, ignore it here and
+            # raise a proper error later
+            if not glob:
+                resolved_paths.append(path)
+                continue
+
+            resolved_paths.extend(glob)
+
+        return resolved_paths
