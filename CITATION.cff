@@ -13,7 +13,7 @@ authors:
   orcid: https://orcid.org/0000-0001-7058-5938
 cff-version: 1.2.0
 date-released: 2026-03-10
-# doi: 10.5281/zenodo.14361733
+doi: 10.5281/zenodo.18937450
 keywords:
 - ESMValTool
 - Earth System Models
