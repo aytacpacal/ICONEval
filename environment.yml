@@ -9,7 +9,7 @@ dependencies:
   - loguru
   - prov
   - pylatex
-  - python>=3.10
+  - python>=3.12
   - python-swiftclient
   - pyyaml
   - requests
@@ -17,3 +17,4 @@ dependencies:
   # develop
   - pre-commit
   - py-markdown-table
+  - pytest
