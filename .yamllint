@@ -6,4 +6,6 @@ rules:
   line-length:
     level: warning
     max: 120
-  octal-values: enable
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
