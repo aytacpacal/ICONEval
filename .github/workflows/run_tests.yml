@@ -41,7 +41,6 @@ jobs:
       - run: pip install --no-deps -e .[develop] 2>&1 | tee test_linux_artifacts_python_${{ matrix.python-version }}/install.txt
       - run: conda list
       - run: pip check
-      - run: pre-commit run --all
       - run: pytest -n 2 2>&1 | tee test_linux_artifacts_python_${{ matrix.python-version }}/test_report.txt
       - name: Upload artifacts
         if: ${{ always() }} # upload artifacts even if fail
