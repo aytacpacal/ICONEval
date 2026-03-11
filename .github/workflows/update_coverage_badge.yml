@@ -20,8 +20,7 @@ jobs:
     steps:
       - name: Set name of target branch
         run: |
-          export CURRENT_DATE=${{ github.event.repository.updated_at}} | sed 's/:/./g'
-          echo "TARGET_BRANCH=update_coverage_badge$CURRENT_DATE" >> $GITHUB_ENV
+          echo "TARGET_BRANCH=update_coverage_badge_$(date +%s)" >> $GITHUB_ENV
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -46,6 +45,8 @@ jobs:
           pytest-xml-coverage-path: ./coverage.xml
           junitxml-path: ./pytest.xml
           hide-comment: true
+      - name: Print coverage
+        run: echo ${{ steps.coverage.outputs.coverageHtml }}
       - name: Update README
         run: |
           sed -i "/<!-- Pytest Coverage Comment:Begin -->/,/<!-- Pytest Coverage Comment:End -->/c\<!-- Pytest Coverage Comment:Begin -->\n${STEPS_COVERAGE_OUTPUTS_COVERAGE_HTML}\n<!-- Pytest Coverage Comment:End -->" ./README.md
@@ -59,7 +60,6 @@ jobs:
           create_branch: true
           file_pattern: README.md
       - name: Create pull request
-        if: steps.auto-commit-action.outputs.changes_detected == 'true'
         run: gh pr create -B main -H $TARGET_BRANCH --title 'Update coverage badge in README'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
