@@ -17,6 +17,8 @@ jobs:
   update_badge:
     runs-on: ubuntu-latest
     name: Update Coverage Badge
+    env:
+      TARGET_BRANCH: "update_coverage_badge${{ github.event.repository.updated_at}}"
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -29,7 +31,7 @@ jobs:
           activate-environment: iconeval
           environment-file: environment.yml
           python-version: ${{ matrix.python-version }}
-          miniforge-version: "latest"
+          miniforge-version: latest
           use-mamba: true
       - name: Install ICONEval
         run: pip install --no-deps -e .[develop]
@@ -50,12 +52,12 @@ jobs:
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
         with:
-          branch: auto_pr_update_coverage_badge
+          branch: ${{ env.TARGET_BRANCH }}
           commit_message: Update coverage badge
           create_branch: true
           file_pattern: README.md
       - name: Create pull request
         if: steps.auto-commit-action.outputs.changes_detected == 'true'
-        run: gh pr create -B main -H auto_pr_update_coverage_badge --title 'Update coverage badge in README'
+        run: gh pr create -B main -H ${TARGET_BRANCH} --title 'Update coverage badge in README'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -8,7 +8,7 @@ permissions:
 on:
   pull_request:
     branches:
-      - '*'
+      - "*"
 
 # Required shell entrypoint to have properly configured bash shell
 defaults:
@@ -31,7 +31,7 @@ jobs:
           activate-environment: iconeval
           environment-file: environment.yml
           python-version: ${{ matrix.python-version }}
-          miniforge-version: "latest"
+          miniforge-version: latest
           use-mamba: true
       - name: Install ICONEval
         run: pip install --no-deps -e .[develop]
