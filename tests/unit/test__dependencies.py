@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 
-import iconeval._dependencies
 from iconeval._dependencies import (
     latex_is_available,
     verify_esmvaltool_installation,
@@ -14,29 +12,6 @@ from iconeval._dependencies import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-
-@dataclass
-class Process:
-    returncode: int
-
-
-class PatchedSubprocess:
-    def __init__(self, returncode: int) -> None:
-        self.returncode = returncode
-
-    def run(self, *_: Any, **__: Any) -> Process:
-        return Process(returncode=self.returncode)
-
-
-@pytest.fixture
-def patch_subprocess_run_return_0(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(iconeval._dependencies, "subprocess", PatchedSubprocess(0))
-
-
-@pytest.fixture
-def patch_subprocess_run_return_1(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(iconeval._dependencies, "subprocess", PatchedSubprocess(1))
 
 
 def test_latex_is_available_true(patch_subprocess_run_return_0: Callable) -> None:
