@@ -17,9 +17,11 @@ jobs:
   update_badge:
     runs-on: ubuntu-latest
     name: Update Coverage Badge
-    env:
-      TARGET_BRANCH: "update_coverage_badge${{ github.event.repository.updated_at}}"
     steps:
+      - name: Set name of target branch
+        run: |
+          export CURRENT_DATE=${{ github.event.repository.updated_at}} | sed 's/:/./g'
+          echo "TARGET_BRANCH=update_coverage_badge$CURRENT_DATE" >> $GITHUB_ENV
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -58,6 +60,6 @@ jobs:
           file_pattern: README.md
       - name: Create pull request
         if: steps.auto-commit-action.outputs.changes_detected == 'true'
-        run: gh pr create -B main -H ${TARGET_BRANCH} --title 'Update coverage badge in README'
+        run: gh pr create -B main -H $TARGET_BRANCH --title 'Update coverage badge in README'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
