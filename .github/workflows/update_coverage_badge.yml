@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: true  # necessary for git-auto-commit-action
       - name: Setup Conda environment
         uses: conda-incubator/setup-miniconda@fc2d68f6413eb2d87b895e92f8584b5b94a10167 # v3.3.0
         with:
@@ -44,9 +44,9 @@ jobs:
           hide-comment: true
       - name: Update README
         run: |
-          sed -i '/<!-- Pytest Coverage Comment:Begin -->/,/<!-- Pytest Coverage Comment:End -->/c\<!-- Pytest Coverage Comment:Begin -->\n${STEPS_COVERAGE_OUTPUTS_COVERAGEHTML}\n<!-- Pytest Coverage Comment:End -->' ./README.md
+          sed -i '/<!-- Pytest Coverage Comment:Begin -->/,/<!-- Pytest Coverage Comment:End -->/c\<!-- Pytest Coverage Comment:Begin -->\n${STEPS_COVERAGE_OUTPUTS_COVERAGE_HTML}\n<!-- Pytest Coverage Comment:End -->' ./README.md
         env:
-          STEPS_COVERAGE_OUTPUTS_COVERAGEHTML: ${{ steps.coverage.outputs.coverageHtml }}
+          STEPS_COVERAGE_OUTPUTS_COVERAGE_HTML: ${{ steps.coverage.outputs.coverageHtml }}
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5.2.0
         with:
