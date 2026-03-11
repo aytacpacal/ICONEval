@@ -71,7 +71,7 @@ def publish_esmvaltool_html(
 
     Returns
     -------
-    str
+    :
         Website URL.
 
     Raises

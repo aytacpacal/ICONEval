@@ -2,6 +2,9 @@
 
 extends: default
 
+ignore:
+  - tests/expected_output
+
 rules:
   line-length:
     level: warning

@@ -89,7 +89,7 @@ def plots2pdf(
 
     Returns
     -------
-    pathlib.Path
+    :
         Path of the resulting PDF document.
 
     Raises
@@ -199,7 +199,7 @@ def _create_document(
 
     Returns
     -------
-    pylatex.Document
+    :
         Output document.
 
     """
@@ -240,7 +240,7 @@ def _get_all_plot_files(
 
     Returns
     -------
-    dict
+    :
         Paths to plots (keys) with additional metadata for each plot read from
         provenance information (:obj:`dict`; values).
 
@@ -370,7 +370,7 @@ def _get_recipe_info(input_dir: Path) -> dict[str, Any]:
 
     Returns
     -------
-    dict
+    :
         Recipe information. Includes the key ``title``; may include the keys
         ``description``, ``authors``, ``maintainer`, ``references``,
         ``projects``.

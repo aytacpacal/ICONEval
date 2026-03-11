@@ -68,7 +68,7 @@ def icon_evaluation(
     dask_options: dict | None = None,
     tags: str | list[str] | None = None,
     **extra_facets: FacetType,
-) -> None:
+) -> Path:
     """Conveniently evaluate ICON model output with ESMValTool.
 
     Specify a directory containing ICON simulation output and automatically run
@@ -170,6 +170,11 @@ def icon_evaluation(
         All possible extra facets for ICON are given here
         (https://docs.esmvaltool.org/projects/ESMValCore/en/latest/quickstart/
         find_data.html#icon).
+
+    Returns
+    -------
+    :
+        Output directory.
 
     Raises
     ------
@@ -286,7 +291,7 @@ def icon_evaluation(
         logger.info(
             f"Time for running ICONEval was {TIMES['end'] - TIMES['start']}",
         )
-        return
+        return io_handler.output_dir
 
     # Create summary HTML and publish it if desired
     TIMES["start_html"] = datetime.now(UTC)
@@ -311,6 +316,8 @@ def icon_evaluation(
     logger.info(
         f"Time for running ICONEval was {TIMES['end'] - TIMES['start']}",
     )
+
+    return io_handler.output_dir
 
 
 def _create_pdfs(io_handler: IconEvalIOHandler, jobs: list[Job]) -> None:

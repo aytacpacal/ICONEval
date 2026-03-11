@@ -14,22 +14,22 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-def test_latex_is_available_true(patch_subprocess_run_return_0: Callable) -> None:
+def test_latex_is_available_true(patched_subprocess_return_0: Callable) -> None:
     assert latex_is_available() is True
 
 
-def test_latex_is_available_false(patch_subprocess_run_return_1: Callable) -> None:
+def test_latex_is_available_false(patched_subprocess_return_1: Callable) -> None:
     assert latex_is_available() is False
 
 
 def test_verify_esmvaltool_installation_success(
-    patch_subprocess_run_return_0: Callable,
+    patched_subprocess_return_0: Callable,
 ) -> None:
     verify_esmvaltool_installation("esmvaltool")
 
 
 def test_verify_esmvaltool_installation_fail(
-    patch_subprocess_run_return_1: Callable,
+    patched_subprocess_return_1: Callable,
 ) -> None:
     msg = r"esmvaltool command not found"
     with pytest.raises(RuntimeError, match=msg):
@@ -37,13 +37,13 @@ def test_verify_esmvaltool_installation_fail(
 
 
 def test_verify_slurm_installation_success(
-    patch_subprocess_run_return_0: Callable,
+    patched_subprocess_return_0: Callable,
 ) -> None:
     verify_slurm_installation("srun")
 
 
 def test_verify_slurm_installation_fail(
-    patch_subprocess_run_return_1: Callable,
+    patched_subprocess_return_1: Callable,
 ) -> None:
     msg = r"srun command not found"
     with pytest.raises(RuntimeError, match=msg):
