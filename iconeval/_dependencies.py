@@ -31,7 +31,8 @@ def verify_esmvaltool_installation(esmvaltool_executable: str) -> None:
 
     """
     logger.debug(
-        "Checking availability of ESMValTool using executable 'esmvaltool_executable'",
+        f"Checking availability of ESMValTool using executable "
+        f"'{esmvaltool_executable}'",
     )
     process = subprocess.run(  # noqa: S603
         ["which", esmvaltool_executable],  # noqa: S607
