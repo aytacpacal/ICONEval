@@ -10,7 +10,9 @@ import pytest
 
 import iconeval._dependencies
 import iconeval._job
+import iconeval._simulation_info
 import iconeval.main
+import iconeval.output_handling._summarize
 import iconeval.output_handling.publish_html
 
 if TYPE_CHECKING:
@@ -22,27 +24,58 @@ pytest.register_assert_rewrite("tests.integration")
 
 
 @pytest.fixture(autouse=True)
-def always_ignore_swift_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
+def always_ignore_swift_token(mocker: MockerFixture) -> None:
+    mocker.patch.object(
         iconeval.output_handling.publish_html,
         "_valid_swift_token_available",
-        lambda: False,
+        autospec=True,
+        return_value=False,
     )
-    monkeypatch.setattr(
+    mocker.patch.object(
         iconeval.output_handling.publish_html,
         "_create_swift_token",
-        lambda: None,
+        autospec=True,
+        return_value=None,
     )
-    monkeypatch.setattr(
+    mocker.patch.object(
         iconeval.output_handling.publish_html,
         "_read_swiftenv",
-        lambda: ("token", "url", datetime(2000, 1, 1)),
+        autospec=True,
+        return_value=("token", "url", datetime(2000, 1, 1, 0, 0, 0)),
     )
 
 
 @pytest.fixture
 def expected_output_dir() -> Path:
     return Path(str(files("tests"))).resolve() / "expected_output"
+
+
+@pytest.fixture(autouse=True)
+def fix_time(mocker: MockerFixture) -> None:
+    mock = mocker.patch.object(iconeval._simulation_info, "datetime", autospec=True)
+    mock.fromtimestamp.return_value = datetime(2000, 1, 1, 0, 0, 0)
+    mock = mocker.patch.object(
+        iconeval.output_handling.publish_html,
+        "datetime",
+        autospec=True,
+    )
+    mock.fromtimestamp.return_value = datetime(2000, 1, 1, 0, 0, 0)
+
+
+@pytest.fixture(autouse=True)
+def fix_user(mocker: MockerFixture) -> None:
+    mocker.patch.object(
+        iconeval._simulation_info,
+        "get_user_name",
+        autospec=True,
+        return_value="ICONEval User",
+    )
+    mocker.patch.object(
+        iconeval.output_handling._summarize,
+        "get_user_name",
+        autospec=True,
+        return_value="ICONEval User",
+    )
 
 
 @pytest.fixture

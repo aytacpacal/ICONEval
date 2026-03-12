@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 
 import pytest
 
-import iconeval._simulation_info
 from iconeval._simulation_info import SimulationInfo
 
 
@@ -42,26 +40,7 @@ def test_from_path(
     project: str,
     namelist_files: list[str | Path],
     sample_data_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    class MockedDatetime:
-        def fromtimestamp(self) -> datetime:
-            return datetime(2000, 1, 1, 0, 0, 0)
-
-    def mocked_get_user_name(_: int | None) -> str:
-        return "ICONEval User"
-
-    monkeypatch.setattr(
-        iconeval._simulation_info,
-        "datetime",
-        MockedDatetime,
-    )
-    monkeypatch.setattr(
-        iconeval._simulation_info,
-        "get_user_name",
-        mocked_get_user_name,
-    )
-
     sample_data = sample_data_path / exp
     namelist_files = [sample_data / n for n in namelist_files]
 
