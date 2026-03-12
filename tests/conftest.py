@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from importlib.resources import files
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -9,6 +10,8 @@ import pytest
 
 import iconeval._dependencies
 import iconeval._job
+import iconeval.main
+import iconeval.output_handling.publish_html
 
 if TYPE_CHECKING:
     from unittest.mock import Mock
@@ -18,9 +21,33 @@ if TYPE_CHECKING:
 pytest.register_assert_rewrite("tests.integration")
 
 
+@pytest.fixture(autouse=True)
+def always_ignore_swift_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        iconeval.output_handling.publish_html,
+        "_valid_swift_token_available",
+        lambda: False,
+    )
+    monkeypatch.setattr(
+        iconeval.output_handling.publish_html,
+        "_create_swift_token",
+        lambda: None,
+    )
+    monkeypatch.setattr(
+        iconeval.output_handling.publish_html,
+        "_read_swiftenv",
+        lambda: ("token", "url", datetime(2000, 1, 1)),
+    )
+
+
 @pytest.fixture
 def expected_output_dir() -> Path:
     return Path(str(files("tests"))).resolve() / "expected_output"
+
+
+@pytest.fixture
+def mocked_plots2pdf(mocker: MockerFixture) -> Mock:
+    return mocker.patch.object(iconeval.main, "plots2pdf", autospec=True)
 
 
 @pytest.fixture
@@ -37,6 +64,27 @@ def mocked_subprocess__job(mocker: MockerFixture) -> Mock:
     mock.Popen.return_value.communicate.return_value = ("stdout", "stderr")
     mock.PIPE = sentinel.PIPE
     return mock
+
+
+@pytest.fixture
+def mocked_swift_service(mocker: MockerFixture) -> Mock:
+    mock_upload_object = mocker.patch.object(
+        iconeval.output_handling.publish_html,
+        "SwiftUploadObject",
+        autospec=True,
+    )
+    mock_upload_object.side_effect = lambda f, object_name=None: (f, object_name)
+
+    return mocker.patch.object(
+        iconeval.output_handling.publish_html,
+        "SwiftService",
+        autospec=True,
+    )
+
+
+@pytest.fixture
+def recipe_template_dir() -> Path:
+    return Path(str(files("iconeval"))).resolve() / "recipe_templates"
 
 
 @pytest.fixture

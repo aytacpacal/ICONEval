@@ -137,7 +137,7 @@ def icon_evaluation(
     ignore_recipe_esmvaltool_options:
         If `True`, ignore additional ESMValTool configuration options specified
         in the recipe templates via the syntax `#ESMVALTOOL --option=value`. If
-        `False`, do not ignore them.
+        `False`, do not ignore them.srun_options
     ignore_recipe_srun_options:
         If `True`, ignore additional srun options specified in the recipe
         templates via the syntax `#SRUN --option=value`. If `False`, do not
@@ -149,16 +149,16 @@ def icon_evaluation(
     esmvaltool_options:
         Additional ESMValTool configuration options used to run all recipes.
         These settings will be overwritten by recipe-specific `#ESMVALTOOL`
-        options. Use the syntax `--esmvaltool_options: '{"--option":
+        options. Use the syntax `--esmvaltool_options='{"--option":
         "value"}'`.
     srun_options:
         Additional srun options used to run all recipes. These settings will be
         overwritten by recipe-specific `#SRUN` options. Use the syntax
-        `--srun_options: '{"--option": "value"}'`.
+        `--srun_options='{"--option": "value"}'`.
     dask_options:
         Additional Dask options used to run all recipes. These settings will be
         overwritten by recipe-specific `#DASK` options. Ignored if
-        `--dask=False`. Use the syntax `--dask_options: '{"--option":
+        `--dask=False`. Use the syntax `--dask_options='{"--option":
         "value"}'`.
     tags:
         Only recipes with the given tags are run. If not given, run all

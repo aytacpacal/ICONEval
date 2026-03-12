@@ -231,7 +231,7 @@ def _publish_html(
                 raise SwiftError(msg)
 
         # Make container publicly accessible
-        swift.post(container_name, options={"read_acl": ".r:*"})
+        swift.post(container=container_name, options={"read_acl": ".r:*"})
 
     logger.debug(
         f"Successfully uploaded contents of {esmvaltool_output_dir} to swift "
