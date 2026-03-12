@@ -6,10 +6,6 @@ https://github.com/ESMValGroup/ESMValTool/blob/main/esmvaltool/utils/testing/reg
 ESMValTool is licensed under a Apache License 2.0. A copy of this license is
 available at https://github.com/ESMValGroup/ESMValTool/blob/main/LICENSE.
 
-
-For example, it is necessary to explicitly link to index.html of recipes for
-swift.
-
 """
 
 from __future__ import annotations
