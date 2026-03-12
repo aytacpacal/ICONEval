@@ -50,6 +50,17 @@ def assert_output(
                 expected_content = expected_file.read_text(encoding="utf-8")
                 assert actual_content == expected_content
 
+            # index.html files are identical apart from paths
+            elif expected_file.name.startswith("index"):
+                actual_content = actual_file.read_text(encoding="utf-8")
+                expected_content = expected_file.read_text(encoding="utf-8")
+                for idx, input_dir in enumerate(input_dirs):
+                    expected_content = expected_content.replace(
+                        f"{{{{iconeval_input_path:{idx}}}}}",
+                        str(input_dir),
+                    )
+                assert actual_content == expected_content
+
             # Config files are different (different paths), so we need to be
             # more careful here
             elif expected_file.name == "config-user.yml":
@@ -147,13 +158,6 @@ def assert_output(
                 assert actual_content["projects"]["EMAC"] == {
                     "data": expected_emac_config,
                 }
-
-            # For index.html files, just check that basic information is
-            # present
-            elif expected_file.name.startswith("index"):
-                actual_content = actual_file.read_text(encoding="utf-8")
-                for input_dir in input_dirs:
-                    assert f"Path: {input_dir}" in actual_content
 
             else:
                 pytest.fail(f"Unknown file type in output ({_file})")

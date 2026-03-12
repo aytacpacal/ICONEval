@@ -517,7 +517,7 @@ def _write_index_html(
 
     lines = _generate_overview(realm, output_dir)
     if not lines:
-        text = header + "\n" + "         <p><b>No results available.</b> " + footer
+        text = header + "\n" + "         <p><b>No results available.</b>" + footer
     else:
         lines = ["        " + line for line in lines]
         text = header + "\n".join(lines) + footer
