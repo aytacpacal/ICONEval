@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import sentinel
 
 import pytest
 
@@ -16,38 +17,78 @@ if TYPE_CHECKING:
 
 def test_latex_is_available_true(mocked_subprocess__dependencies: Mock) -> None:
     assert latex_is_available() is True
+    mocked_subprocess__dependencies.run.assert_called_once_with(
+        ["which", "latex"],
+        shell=False,
+        check=False,
+        capture_output=True,
+    )
 
 
 def test_latex_is_available_false(mocked_subprocess__dependencies: Mock) -> None:
     mocked_subprocess__dependencies.run.return_value.returncode = 1
     assert latex_is_available() is False
+    mocked_subprocess__dependencies.run.assert_called_once_with(
+        ["which", "latex"],
+        shell=False,
+        check=False,
+        capture_output=True,
+    )
 
 
 def test_verify_esmvaltool_installation_success(
     mocked_subprocess__dependencies: Mock,
 ) -> None:
-    verify_esmvaltool_installation("esmvaltool")
+    esmvaltool_executable = sentinel.esmvaltool
+    verify_esmvaltool_installation(esmvaltool_executable)
+    mocked_subprocess__dependencies.run.assert_called_once_with(
+        ["which", esmvaltool_executable],
+        shell=False,
+        check=False,
+        capture_output=True,
+    )
 
 
 def test_verify_esmvaltool_installation_fail(
     mocked_subprocess__dependencies: Mock,
 ) -> None:
+    esmvaltool_executable = sentinel.esmvaltool
     mocked_subprocess__dependencies.run.return_value.returncode = 1
     msg = r"esmvaltool command not found"
     with pytest.raises(RuntimeError, match=msg):
-        verify_esmvaltool_installation("esmvaltool")
+        verify_esmvaltool_installation(esmvaltool_executable)
+    mocked_subprocess__dependencies.run.assert_called_once_with(
+        ["which", esmvaltool_executable],
+        shell=False,
+        check=False,
+        capture_output=True,
+    )
 
 
 def test_verify_slurm_installation_success(
     mocked_subprocess__dependencies: Mock,
 ) -> None:
-    verify_slurm_installation("srun")
+    srun_executable = sentinel.srun
+    verify_slurm_installation(srun_executable)
+    mocked_subprocess__dependencies.run.assert_called_once_with(
+        ["which", srun_executable],
+        shell=False,
+        check=False,
+        capture_output=True,
+    )
 
 
 def test_verify_slurm_installation_fail(
     mocked_subprocess__dependencies: Mock,
 ) -> None:
+    srun_executable = sentinel.srun
     mocked_subprocess__dependencies.run.return_value.returncode = 1
     msg = r"srun command not found"
     with pytest.raises(RuntimeError, match=msg):
-        verify_slurm_installation("srun")
+        verify_slurm_installation(srun_executable)
+    mocked_subprocess__dependencies.run.assert_called_once_with(
+        ["which", srun_executable],
+        shell=False,
+        check=False,
+        capture_output=True,
+    )
