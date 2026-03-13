@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from typing import TYPE_CHECKING, Any
 from unittest.mock import call, sentinel
 
@@ -31,7 +32,9 @@ def test_main_script_fail(
     mocked_subprocess__dependencies: Mock,
     mocked_subprocess__job: Mock,
     mocked_swift_service: Mock,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(sys, "argv", [""])
     process = subprocess.run(["iconeval"], check=False, capture_output=True)  # noqa: S607
     assert process.returncode == 1
 
