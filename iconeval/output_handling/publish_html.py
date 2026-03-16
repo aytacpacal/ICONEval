@@ -288,5 +288,5 @@ def main() -> None:
     fire.Fire(publish_esmvaltool_html)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

@@ -506,5 +506,5 @@ def main() -> None:
     fire.Fire(plots2pdf)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
