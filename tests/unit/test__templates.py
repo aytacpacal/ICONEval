@@ -138,7 +138,7 @@ def test_recipe_template__parse_additional_options_too_long_fail(
 def test_recipe_template__parse_additional_options_invalid_option(
     recipe_template_path: Path,
 ) -> None:
-    recipe_template_path.write_text("#OPTION  invalid_option")
+    recipe_template_path.write_text("#OPTION invalid_option=1")
     template = RecipeTemplate(recipe_template_path, check_placeholders=False)
     msg = r"Invalid option option given in recipe template"
     with pytest.raises(ValueError, match=msg):
