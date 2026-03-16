@@ -338,7 +338,7 @@ class RecipeTemplate(Template):
             line = line.replace(keyword, "")
             option = line.split("=")
             error_msg = (
-                f"Invalid {option_name} option given in recipe {self.path}: "
+                f"Invalid {option_name} option given in recipe template {self.path}: "
                 f"'{original_line}', expected form '{keyword} --key=value' "
                 f"(additional whitespace is fine)"
             )
