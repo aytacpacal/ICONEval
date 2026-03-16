@@ -54,22 +54,22 @@ variable_vs_lat_plot:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     ICON_input:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     ICON_ICON:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     ICON_ICON_input:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     default:
       color: lightgray
       label: null
@@ -192,22 +192,22 @@ diagnostics:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               ICON_input:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               ICON_ICON:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               ICON_ICON_input:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               default:
                 color: lightgray
                 label: null
