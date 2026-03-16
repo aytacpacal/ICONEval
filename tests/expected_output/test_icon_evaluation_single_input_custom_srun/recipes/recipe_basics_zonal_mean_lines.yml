@@ -54,22 +54,22 @@ variable_vs_lat_plot:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     EMAC_input:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     EMAC_EMAC:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     EMAC_EMAC_input:
       label: '{dataset} ({exp})'
       linewidth: 1.25
       zorder: 2.5
-      color: C0
+      color: blue
     default:
       color: lightgray
       label: null
@@ -192,22 +192,22 @@ diagnostics:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               EMAC_input:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               EMAC_EMAC:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               EMAC_EMAC_input:
                 label: '{dataset} ({exp})'
                 linewidth: 1.25
                 zorder: 2.5
-                color: C0
+                color: blue
               default:
                 color: lightgray
                 label: null

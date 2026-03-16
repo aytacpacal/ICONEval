@@ -44,6 +44,7 @@ variable_vs_lat_plot: &variable_vs_lat_plot
       label: "{dataset} ({exp})"
       linewidth: 1.25
       zorder: 2.5
+      color: blue
     default:  # These will be used for CMIP6 models
       color: lightgray
       label: null
