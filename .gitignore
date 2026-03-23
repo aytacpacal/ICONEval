@@ -1,5 +1,12 @@
 # Output directory created by this tool
 output_iconeval/
+output_modeleval
+
+#JCM output
+test_jcm/
+
+#SLURM output
+slurm-*.out
 
 # IDEs
 .vscode/

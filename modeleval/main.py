@@ -18,7 +18,11 @@ from modeleval._dependencies import (
 )
 from modeleval._io_handler import ModelEvalIOHandler
 from modeleval._logging import configure_logging
-from modeleval.output_handling._summarize import get_html_description, summarize
+from modeleval.output_handling._summarize import (
+    get_html_description,
+    summarize,
+    summarize_portable,
+)
 from modeleval.output_handling.plots2pdf import plots2pdf
 from modeleval.output_handling.publish_html import publish_esmvaltool_html
 
@@ -49,6 +53,7 @@ def model_evaluation(
     *input_dirs: str | Path,
     model_config: str | Path | None = None,
     publish_html: bool = False,
+    portable_html: bool = False,
     html_name: str | None = None,
     create_pdfs: bool = False,
     recipe_templates: str | Path | Iterable[str | Path] | None = None,
@@ -92,6 +97,11 @@ def model_evaluation(
         Publish ESMValTool summary HTML on a **public** website using DKRZ's
         Python-swiftclient
         (https://docs.dkrz.de/doc/datastorage/swift/python-swiftclient.html).
+    portable_html:
+        Create self-contained ``*_portable.html`` copies of the summary HTML
+        files in which all figures are embedded as base64 data URIs. The
+        resulting files can be shared as a single file without needing the
+        accompanying plot directories.
     html_name:
         Name that is used for the URL of the ESMValTool summary HTML and the
         output subdirectory that will be created in `output_dir`. Use this to
@@ -204,6 +214,7 @@ def model_evaluation(
     logger.debug(f"{'input_dirs':<35} = {input_dirs}")
     logger.debug(f"{'model_config':<35} = {model_config}")
     logger.debug(f"{'publish_html':<35} = {publish_html}")
+    logger.debug(f"{'portable_html':<35} = {portable_html}")
     logger.debug(f"{'html_name':<35} = {html_name}")
     logger.debug(f"{'create_pdfs':<35} = {create_pdfs}")
     logger.debug(f"{'recipe_templates':<35} = {recipe_templates}")
@@ -298,6 +309,8 @@ def model_evaluation(
     logger.info("HTML output:")
     logger.info("------------")
     _create_summary_html(io_handler)
+    if portable_html:
+        summarize_portable(io_handler.output_dir_esmvaltool)
     if publish_html:
         _publish_html(io_handler, html_name)
     TIMES["end_html"] = datetime.now(UTC)
