@@ -2,9 +2,9 @@
 
 # Customization
 
-To evaluate ICON simulation output, ICONEval reads [ESMValTool recipe
+To evaluate model simulation output, ModelEval reads [ESMValTool recipe
 templates](#esmvaltool-recipes). These templates are then filled with
-information from the ICON simulation that will be evaluated. This is done via
+information from the simulation that will be evaluated. This is done via
 placeholders (`{{placeholder}}`) in the files.
 
 Individual ESMValTool runs can be further customized with additional
@@ -12,16 +12,21 @@ Individual ESMValTool runs can be further customized with additional
 options](#slurm-options-for-jobjob-step-submission) and/or [Dask
 options](#dask-options). Finally, [additional command line
 options](#additional-command-line-options) allow an even further customization
-of ICONEval.
+of ModelEval.
+
+> [!NOTE]
+> The primary command is `modeleval`. The `iconeval` command is kept as a
+> backward-compatible alias. All examples below use `modeleval`.
 
 ## ESMValTool Recipes
 
 By default, recipe templates are read from the [recipe template
-directory](https://github.com/EyringMLClimateGroup/ICONEval/tree/main/iconeval/recipe_templates)
+directory](https://github.com/EyringMLClimateGroup/ICONEval/tree/main/modeleval/recipe_templates)
 in the installation directory of this tool. To only run a custom recipe, use
 
 ```bash
-iconeval path/to/ICON_output --recipe_templates=/path/to/recipe_1.yml
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --recipe_templates=/path/to/recipe_1.yml
 ```
 
 Make sure that all recipe names start with `recipe_`.
@@ -29,76 +34,72 @@ Make sure that all recipe names start with `recipe_`.
 Unix-style wildcards are supported:
 
 ```bash
-iconeval path/to/ICON_output --recipe_templates=/path/to/recipe_*.yml
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --recipe_templates=/path/to/recipe_*.yml
 ```
 
 To run multiple recipe (patterns), use the syntax:
 
 ```bash
-iconeval path/to/ICON_output --recipe_templates='["/path/to/recipe_1_*.yml", "/path/to/recipe_2.yml"]'
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --recipe_templates='["/path/to/recipe_1_*.yml", "/path/to/recipe_2.yml"]'
 ```
 
 To run custom recipes in addition to the default recipes, use
 
 ```bash
-iconeval path/to/ICON_output --recipe_templates='["/path/to/recipe_1_*.yml", "/path/to/recipe_2.yml"]' --always_use_default_recipe_templates=True
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --recipe_templates='["/path/to/recipe_1_*.yml", "/path/to/recipe_2.yml"]' \
+    --always_use_default_recipe_templates=True
 ```
 
-The default recipes are designed to run effectively on 1/8 of a compute on
+The default recipes are designed to run effectively on 1/8 of a compute node on
 DKRZ's Levante (16 cores, 32 GB of RAM).
 
 The following placeholders are required in the recipe templates:
 
-- `{{dataset_list}}`: Filled with the ICON dataset(s). By default, this uses
-  the following facets:
+- `{{dataset_list}}`: Filled with the dataset(s) to be evaluated. When a
+  `--model_config` is provided, the `project` and `dataset` values come from
+  the YAML file; otherwise ICON auto-detection is used. `{{exp}}` is the
+  experiment name (input directory basename). Example with a custom model:
 
   ```yaml
   datasets:
-    - {project: ICON, dataset: ICON-XPP, exp: '{{exp}}'}
+    - {project: MyModel, dataset: MyModel-v1, exp: 'my_run'}
   ```
 
-  if the ICON output looks like ICON-XPP output (i.e., if a namelist file
-  `NAMELIST_ICON_output_atm` exists in the output directory and it does not
-  contain the string `ECHAM_`), and
-
-  ```yaml
-  datasets:
-    - {project: ICON, dataset: ICON, exp: '{{exp}}'}
-  ```
-
-  otherwise. Here, `{{exp}}` is the ICON experiment name determined from the
-  input directory/directories. The facets of all datasets can be
-  expanded/overwritten by additional command line arguments given to ICONEval,
-  e.g., `--dataset=ICON-XPP`, `--timerange=20000101/20100101`
-  `--frequency=day`, `--horizontal_grid=/path/to/grid_file.nc`.
+  The facets of all datasets can be expanded/overwritten by additional command
+  line arguments, e.g., `--dataset=MyModel-v2`, `--timerange=20000101/20100101`,
+  `--frequency=mon`.
 
 The following placeholders are optional:
 
-- `{{alias_plot_kwargs}}`: Filled with aliases of the ICON dataset for each
-  experiment. Must be a dictionary key in the YAML file. If `color` is missing in
-  the subsequent options, automatically add `C0`, `C1`, etc. Example:
+- `{{alias_plot_kwargs}}`: Filled with plot style kwargs keyed by dataset alias.
+  Must be a dictionary key in the YAML file. If `color` is missing in the
+  subsequent options, automatically adds `C0`, `C1`, etc. Example:
 
   ```yaml
   "{{alias_plot_kwargs}}":
     linewidth: 1.5
   ```
 
-  is expanded in such a way that it includes the aliases, i.e.,
+  is expanded to include aliases for each experiment/dataset:
 
   ```yaml
-  ICON_exp1:
+  MyModel_exp1:
     linewidth: 1.5
     color: C0
-  ICON_exp2:
+  MyModel_exp2:
     linewidth: 1.5
     color: C1
   ```
 
-  for experiments `exp1` and `exp2`.
-- `{{dataset}}`: Filled with the dataset name specified by the `--dataset`
-  command line argument. By default, uses `ICON`.
-- `{{project}}`: Filled with the project specified by the `--project` command
-  line argument. By default, uses `ICON`.
+- `{{dataset}}`: Filled with the dataset name from `--model_config` (or the
+  `--dataset` command line argument). Defaults to `ICON` when no model config
+  is provided.
+- `{{project}}`: Filled with the project from `--model_config` (or the
+  `--project` command line argument). Defaults to `ICON` when no model config
+  is provided.
 - `{{timerange}}`: Filled with the time range specified by the `--timerange`
   command line argument. By default, the entire available time range is
   considered (i.e., `--timerange='*'`). Please specify the time range with at
@@ -126,8 +127,8 @@ More information on these settings is given in the following three sections.
 
 By default, an ESMValTool configuration template is read from the [installation
 directory of this
-tool](https://github.com/EyringMLClimateGroup/ICONEval/blob/main/iconeval/esmvaltool_config_template.yml)
-and filled with information from the current ICONEval run.
+tool](https://github.com/EyringMLClimateGroup/ICONEval/blob/main/modeleval/esmvaltool_config_template.yml)
+and filled with information from the current ModelEval run.
 
 The configuration options `dask`, `output_dir`, and `rootpath` must not be
 overwritten in the [custom ESMValTool
@@ -139,7 +140,8 @@ Additional ESMValTool configuration options can also be specified via the
 command line, e.g.,
 
 ```bash
-iconeval path/to/ICON_output --esmvaltool_options='{"--max_parallel_tasks": 1}'
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --esmvaltool_options='{"--max_parallel_tasks": 1}'
 ```
 
 These options are used for all recipes.
@@ -150,7 +152,8 @@ located in a dedicated configuration directory (e.g., `/path/to/config/dir`),
 which can then be specified via
 
 ```bash
-iconeval path/to/ICON_output --esmvaltool_options='{"--config_dir": "/path/to/config/dir"}'
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --esmvaltool_options='{"--config_dir": "/path/to/config/dir"}'
 ```
 
 For example, this is useful to specify custom [extra
@@ -166,7 +169,7 @@ specified in the recipe templates, e.g.,
 This is particularly useful if a specific recipe needs special requirements
 like a reduced number of parallel processes.
 
-If the optional ICONEval command line argument
+If the optional ModelEval command line argument
 `--ignore_recipe_esmvaltool_options=True` is used, these recipe-specific
 ESMValTool configuration options are ignored for all recipes.
 
@@ -177,17 +180,17 @@ More information and all possible ESMValTool configuration options are given
 
 ## Slurm options for job/job step submission
 
-ICONEval uses [`srun`](https://slurm.schedmd.com/srun.html) to submit jobs or
-job steps depending on how ICONEval is started:
+ModelEval uses [`srun`](https://slurm.schedmd.com/srun.html) to submit jobs or
+job steps depending on how ModelEval is started:
 
-1. If ICONEval is run within an
+1. If ModelEval is run within an
    [`sbatch`](https://slurm.schedmd.com/sbatch.html) script or
    [`salloc`](https://slurm.schedmd.com/salloc.html), one job step per recipe
    is submitted. In this case, the only default option for `srun` is
    `--ntasks=1` (to ensure that each recipe is only run once). All other
    options are inherited from the `sbatch` script/`salloc` session.
 
-1. If ICONEval is run as a standalone script, one job per recipe is submitted.
+1. If ModelEval is run as a standalone script, one job per recipe is submitted.
    In this case, the default `srun` options for each job are:
 
    ```bash
@@ -200,15 +203,16 @@ job steps depending on how ICONEval is started:
    ```
 
 The account that is charged for the job can be specified by the `--account`
-command line option given to ICONEval. By default, this account is either
-inherited from `sbatch`/`salloc` (if ICONEval is run within an `sbatch`
-script/`salloc` session), or set to `'bd1179'` (if ICONEval is run as a
+command line option given to ModelEval. By default, this account is either
+inherited from `sbatch`/`salloc` (if ModelEval is run within an `sbatch`
+script/`salloc` session), or set to `'bd1179'` (if ModelEval is run as a
 standalone script).
 
 Additional `srun` options can also be specified via the command line, e.g.,
 
 ```bash
-iconeval path/to/ICON_output --srun_options='{"--mem": "16G"}'
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --srun_options='{"--mem": "16G"}'
 ```
 
 These options are used for all recipes.
@@ -229,9 +233,9 @@ The above will reserve an entire compute node for 3 hours, which is
 particularly useful for heavy recipes. Make sure to adapt the [Dask
 options](#dask-options) accordingly.
 
-If the optional ICONEval command line argument
+If the optional ModelEval command line argument
 `--ignore_recipe_srun_options=True` is used, these recipe-specific `srun`
-options are ignored for all recipes. This might be useful if ICONEval is run
+options are ignored for all recipes. This might be useful if ModelEval is run
 within an `sbatch` script/`salloc` session to ensure that the recipe-specific
 settings are not conflicting with the `sbatch`/`salloc` options.
 
@@ -258,7 +262,8 @@ This will use a
 Additional Dask options can also be specified via the command line, e.g.,
 
 ```bash
-iconeval path/to/ICON_output --dask_options='{"--memory_limit": "8GB"}'
+modeleval path/to/my_simulation --model_config=my_model.yml \
+    --dask_options='{"--memory_limit": "8GB"}'
 ```
 
 These options are used for all recipes.
@@ -276,11 +281,11 @@ section above). For example, the custom Dask settings given here require a
 total memory of 32 workers times 8 GB = 256 GB. When using a
 [`SLURMCluster`](https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.SLURMCluster.html)
 with `type: dask_jobqueue.SLURMCluster`, the account specified by the command
-line argument `--account` given to ICONEval is charged. If a different `type`
+line argument `--account` given to ModelEval is charged. If a different `type`
 than `distributed.LocalCluster` is used, the default options given above are
 ignored.
 
-If the optional ICONEval command line argument
+If the optional ModelEval command line argument
 `--ignore_recipe_dask_options=True` is used, these recipe-specific Dask options
 are ignored for all recipes.
 
@@ -288,18 +293,19 @@ Recipe-specific options take priority over options specified via command line.
 
 An overview of ESMValTool's Dask configuration is given
 [here](https://docs.esmvaltool.org/projects/ESMValCore/en/latest/quickstart/configure.html#dask-configuration).
-Options given to ICONEval are interpreted as `cluster` keyword arguments.
+Options given to ModelEval are interpreted as `cluster` keyword arguments.
 
 To use the default (thread-based) Dask scheduler instead of a distributed
-scheduler, run ICONEval with the command line argument `--dask=False`.
+scheduler, run ModelEval with the command line argument `--dask=False`.
 
 ## Tags
 
 All default recipe templates are marked with tags. An overview of all available
-tags is given [here](tags.md). To only run a subset of recipes associated with certain tags, use
+tags is given [here](tags.md). To only run a subset of recipes associated with
+certain tags, use
 
 ```bash
-iconeval --tags=timeseries,maps
+modeleval path/to/my_simulation --model_config=my_model.yml --tags=timeseries,maps
 ```
 
 This will run all timeseries and maps recipes.
@@ -314,32 +320,36 @@ tags using the syntax
 
 ## Additional Command Line Options
 
+- `--model_config`: Path to a YAML file describing the model's output
+  conventions (project name, dataset name, file naming patterns, directory
+  structure). If not given, ICON auto-detection is used for backward
+  compatibility. See [`modeleval/model_configs/`](../modeleval/model_configs/)
+  for examples.
 - `--publish_html`: Enable/Disable publishing of an ESMValTool summary HTML on
   a **public** website using DKRZ's
   [Python-swiftclient](https://docs.dkrz.de/doc/datastorage/swift/python-swiftclient.html)
   (default: `False`). To delete existing websites, login to the [swift
   web client](https://swiftbrowser.dkrz.de/) and delete the corresponding
-  directories in the *iconeval* container.
+  directories in the *modeleval* container.
 - `--html_name`: Name that is used for the URL of the ESMValTool summary HTML;
   if `None`, use the name of the output directory (default: `None`). Use this
   to get a consistent URL (this will potentially overwrite existing data!).
   Ignored if `--publish_html=False`.
 - `--create_pdfs`: Enable/Disable creation of summary PDFs (default: `False`).
-- `--log_level`: Log level for ICONEval (default: `info`).
-- `--output_dir`: Output directory for ICONEval (default: `./output_iconeval`).
-- `--background`: Terminate ICONEval after submitting all jobs/job steps
+- `--log_level`: Log level for ModelEval (default: `info`).
+- `--output_dir`: Output directory for ModelEval (default: `./output_modeleval`).
+- `--background`: Terminate ModelEval after submitting all jobs/job steps
   (default: `False`). Neither summary HTMLs nor PDFs can be published/written
   in this mode.
 - `--esmvaltool_executable`: Path to ESMValTool executable (default:
   `esmvaltool`).
 - `--srun_executable`: Path to `srun` executable (default: `srun`).
-- Additional options are interpreted as extra facets for the ICON data. For
+- Additional options are interpreted as extra facets for the model data. For
   example, can include `--timerange` (desired time range, see
   [here](https://docs.esmvaltool.org/projects/ESMValCore/en/latest/recipe/overview.html#time-ranges)
   for examples, but make sure to use at least 8 digits, i.e., the format
-  `YYYYMMDD`), `--frequency` (output frequency of the ICON data),
-  `--horizontal_grid` (path to the ICON horizontal grid file), `--zg_file`
-  (path to the ICON file that contains the vertical coordinate `zg`),
-  `--zghalf_file` (path to the ICON file that contains the vertical coordinate
-  `zghalf`), etc.  All available extra facets for ICON are given
+  `YYYYMMDD`), `--frequency` (output frequency of the model data). For ICON,
+  additional facets include `--horizontal_grid` (path to the horizontal grid
+  file), `--zg_file`, `--zghalf_file`, etc. All available extra facets for
+  ICON are listed
   [here](https://docs.esmvaltool.org/projects/ESMValCore/en/latest/quickstart/find_data.html#icon).

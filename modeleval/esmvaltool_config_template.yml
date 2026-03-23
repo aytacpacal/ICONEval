@@ -1,5 +1,5 @@
 ###############################################################################
-# ESMValTool configuration template for ICONEval
+# ESMValTool configuration template for ModelEval
 ###############################################################################
 ---
 auxiliary_data_dir: /work/bd0854/DATA/ESMValTool2/AUX
