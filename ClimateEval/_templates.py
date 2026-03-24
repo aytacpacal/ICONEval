@@ -9,16 +9,16 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from modeleval._config import ESMValToolConfig
-from modeleval._model_config import (
+from ClimateEval._config import ESMValToolConfig
+from ClimateEval._model_config import (
     create_emac_config,
     create_icon_config,
 )
-from modeleval._recipe import Recipe
+from ClimateEval._recipe import Recipe
 
 if TYPE_CHECKING:
-    from modeleval._simulation_info import SimulationInfo
-    from modeleval._typing import FacetType, OptionValueType
+    from ClimateEval._simulation_info import SimulationInfo
+    from ClimateEval._typing import FacetType, OptionValueType
 
 
 class Template:
@@ -219,12 +219,8 @@ class RecipeTemplate(Template):
         default_dataset = "ICON"
         if simulations_info:
             first_sim = simulations_info[0]
-            default_project = str(
-                first_sim.guessed_facets.get("project", "ICON")
-            )
-            default_dataset = str(
-                first_sim.guessed_facets.get("dataset", "ICON")
-            )
+            default_project = str(first_sim.guessed_facets.get("project", "ICON"))
+            default_dataset = str(first_sim.guessed_facets.get("dataset", "ICON"))
 
         # Fill placeholders
         timerange = extra_facets.get("timerange", "*")
@@ -407,7 +403,7 @@ class ESMValToolConfigTemplate(Template):
         """Write ESMValTool configuration from template."""
         config_yaml = yaml.safe_load(self.content)
 
-        # Add information from current ModelEval run
+        # Add information from current ClimateEval run
         config_yaml["dask"] = dask_config
         config_yaml["output_dir"] = str(output_dir)
         config_yaml = self._fill_projects(config_yaml, simulations_info)
@@ -455,18 +451,16 @@ class ESMValToolConfigTemplate(Template):
                     simulation_info.exp, simulation_info.path
                 )
                 for source in sources:
-                    project_data[project_name][source.name] = (
-                        source.to_esmvaltool_config()
-                    )
+                    project_data[project_name][
+                        source.name
+                    ] = source.to_esmvaltool_config()
 
             else:
                 # Fallback: ICON auto-detection (backward compatibility)
                 icon_mc = create_icon_config(
                     simulation_info.exp,
                     simulation_info.path,
-                    dataset=str(
-                        simulation_info.guessed_facets.get("dataset", "ICON")
-                    ),
+                    dataset=str(simulation_info.guessed_facets.get("dataset", "ICON")),
                 )
                 if "ICON" not in project_data:
                     project_data["ICON"] = {}
@@ -474,23 +468,17 @@ class ESMValToolConfigTemplate(Template):
                     simulation_info.exp, simulation_info.path
                 )
                 for source in sources:
-                    project_data["ICON"][source.name] = (
-                        source.to_esmvaltool_config()
-                    )
+                    project_data["ICON"][source.name] = source.to_esmvaltool_config()
 
                 # Also add EMAC config for backward compatibility
-                emac_mc = create_emac_config(
-                    simulation_info.exp, simulation_info.path
-                )
+                emac_mc = create_emac_config(simulation_info.exp, simulation_info.path)
                 if "EMAC" not in project_data:
                     project_data["EMAC"] = {}
                 emac_sources = emac_mc.build_data_source_for_exp(
                     simulation_info.exp, simulation_info.path
                 )
                 for source in emac_sources:
-                    project_data["EMAC"][source.name] = (
-                        source.to_esmvaltool_config()
-                    )
+                    project_data["EMAC"][source.name] = source.to_esmvaltool_config()
 
         # Merge into projects config
         for project_name, data_config in project_data.items():

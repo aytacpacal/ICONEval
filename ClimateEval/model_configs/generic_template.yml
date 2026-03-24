@@ -1,7 +1,7 @@
-# Generic model configuration template for ModelEval.
+# Generic model configuration template for ClimateEval.
 #
 # Copy this file and customize it for your Earth System Model.
-# Then run ModelEval with:
+# Then run ClimateEval with:
 #
 #   modeleval /path/to/my_simulation --model_config=my_model.yml
 #

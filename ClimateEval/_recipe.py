@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, NamedTuple
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from modeleval._simulation_info import SimulationInfo
-    from modeleval._templates import RecipeTemplate
-    from modeleval._typing import FacetType
+    from ClimateEval._simulation_info import SimulationInfo
+    from ClimateEval._templates import RecipeTemplate
+    from ClimateEval._typing import FacetType
 
 
 class Recipe(NamedTuple):

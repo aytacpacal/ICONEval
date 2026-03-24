@@ -1,4 +1,4 @@
-"""Module that manage types used in ModelEval."""
+"""Module that manage types used in ClimateEval."""
 
 from __future__ import annotations
 

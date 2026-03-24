@@ -14,7 +14,7 @@ import yaml
 from loguru import logger
 
 if TYPE_CHECKING:
-    from modeleval._typing import FacetType
+    from ClimateEval._typing import FacetType
 
 logger = logger.opt(colors=True)
 
@@ -47,7 +47,7 @@ class DataSource:
 class ModelConfig:
     """Configuration describing a model's output conventions.
 
-    This is the central abstraction that allows ModelEval to work with
+    This is the central abstraction that allows ClimateEval to work with
     any ESM. Users provide a YAML file with this information, or use
     the built-in auto-detection for known models (ICON, EMAC).
 
@@ -130,9 +130,7 @@ class ModelConfig:
                                 source_config.get("dirname_template", "")
                             ),
                             filename_template=str(
-                                source_config.get(
-                                    "filename_template", "*.nc"
-                                )
+                                source_config.get("filename_template", "*.nc")
                             ),
                             type=str(
                                 source_config.get(
@@ -140,9 +138,7 @@ class ModelConfig:
                                     "esmvalcore.io.local.LocalDataSource",
                                 )
                             ),
-                            ignore_warnings=source_config.get(
-                                "ignore_warnings"
-                            ),
+                            ignore_warnings=source_config.get("ignore_warnings"),
                         )
                     )
 
@@ -189,7 +185,9 @@ class ModelConfig:
             # templates and rootpath
             sources = []
             for ds in self.data_sources:
-                rootpath = ds.rootpath.replace("{simulation_path}", str(simulation_path))
+                rootpath = ds.rootpath.replace(
+                    "{simulation_path}", str(simulation_path)
+                )
                 rootpath = rootpath.replace("{exp}", exp)
                 sources.append(
                     DataSource(
@@ -312,8 +310,7 @@ def create_emac_config(
                 },
                 {
                     "message": (
-                        r"NetCDF variable .* contains unknown cell method "
-                        r".*"
+                        r"NetCDF variable .* contains unknown cell method " r".*"
                     ),
                     "module": "iris",
                 },

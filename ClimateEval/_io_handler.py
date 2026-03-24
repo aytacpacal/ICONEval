@@ -6,22 +6,22 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from modeleval._job import Job
-from modeleval._model_config import ModelConfig
-from modeleval._simulation_info import SimulationInfo
-from modeleval._templates import ESMValToolConfigTemplate, RecipeTemplate
+from ClimateEval._job import Job
+from ClimateEval._model_config import ModelConfig
+from ClimateEval._simulation_info import SimulationInfo
+from ClimateEval._templates import ESMValToolConfigTemplate, RecipeTemplate
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from modeleval._typing import FacetType, OptionValueType
+    from ClimateEval._typing import FacetType, OptionValueType
 
 from loguru import logger
 
 logger = logger.opt(colors=True)
 
 
-class ModelEvalIOHandler:
+class ClimateEvalIOHandler:
     """Class that manages IO dirs and files for model output evaluation."""
 
     PROJECT_ROOT_DIR = Path(__file__).parent.resolve()
@@ -29,7 +29,7 @@ class ModelEvalIOHandler:
     CFG_TEMPLATE = PROJECT_ROOT_DIR / "esmvaltool_config_template.yml"
     DEFAULT_RECIPE_TEMPLATE_DIR = PROJECT_ROOT_DIR / "recipe_templates"
 
-    DEFAULT_OUTPUT_DIR_NAME = "output_modeleval"
+    DEFAULT_OUTPUT_DIR_NAME = "output_ClimateEval"
     OUTPUT_DIR_CONFIG = "config"
     OUTPUT_DIR_ESMVALTOOL = "esmvaltool_output"
     OUTPUT_DIR_PDFS = "pdfs"
@@ -101,7 +101,7 @@ class ModelEvalIOHandler:
     def __repr__(self) -> str:
         """Return string representation of class instance."""
         return (
-            f"ModelEvalIOHandler(input_dirs={self.input_dirs!r}, "
+            f"ClimateEvalIOHandler(input_dirs={self.input_dirs!r}, "
             f"output_dir={self.output_dir!r})"
         )
 
@@ -289,9 +289,9 @@ class ModelEvalIOHandler:
 
         dask_config.update(
             {
-                "use": "modeleval",
+                "use": "ClimateEval",
                 "profiles": {
-                    "modeleval": {
+                    "ClimateEval": {
                         "cluster": cluster_options,
                     },
                 },

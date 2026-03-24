@@ -7,13 +7,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from modeleval import get_user_name
+from ClimateEval import get_user_name
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from modeleval._model_config import ModelConfig
-    from modeleval._typing import FacetType
+    from ClimateEval._model_config import ModelConfig
+    from ClimateEval._typing import FacetType
 
 
 @dataclass

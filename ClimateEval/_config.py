@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from modeleval._simulation_info import SimulationInfo
-    from modeleval._templates import ESMValToolConfigTemplate
+    from ClimateEval._simulation_info import SimulationInfo
+    from ClimateEval._templates import ESMValToolConfigTemplate
 
 
 class ESMValToolConfig(NamedTuple):

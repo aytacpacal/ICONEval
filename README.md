@@ -13,13 +13,13 @@
 
 ---
 
-# ModelEval (formerly ICONEval)
+# ClimateEval (formerly ICONEval)
 
 ESM output evaluation with ESMValTool.
 
 ## Table of Contents
 
-- [ModelEval (formerly ICONEval)](#modeleval-formerly-iconeval)
+- [ClimateEval (formerly ICONEval)](#ClimateEval-formerly-iconeval)
   - [Table of Contents](#table-of-contents)
   - [Quick Start](#quick-start)
   - [Model Configuration](#model-configuration)
@@ -34,7 +34,7 @@ ESM output evaluation with ESMValTool.
 
 ## Quick Start
 
-ModelEval evaluates Earth System Model output with [ESMValTool](doc/esmvaltool.md)
+ClimateEval evaluates Earth System Model output with [ESMValTool](doc/esmvaltool.md)
 by automatically running a set of predefined ESMValTool recipes.
 
 ### ICON (auto-detection)
@@ -43,7 +43,7 @@ For ICON simulations, no model configuration file is needed. Pass the path to
 the simulation output directory (whose name must match the experiment name):
 
 ```bash
-modeleval path/to/ICON_output
+ClimateEval path/to/ICON_output
 ```
 
 The `iconeval` command is kept as a backward-compatible alias.
@@ -53,7 +53,7 @@ The `iconeval` command is kept as a backward-compatible alias.
 For any other ESM, provide a [model configuration YAML](#model-configuration):
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml
+ClimateEval path/to/my_simulation --model_config=my_model.yml
 ```
 
 ### Multiple simulations
@@ -61,15 +61,15 @@ modeleval path/to/my_simulation --model_config=my_model.yml
 Multiple simulations can be evaluated simultaneously:
 
 ```bash
-modeleval path/to/sim1 path/to/sim2 --model_config=my_model.yml
+ClimateEval path/to/sim1 path/to/sim2 --model_config=my_model.yml
 ```
 
 ---
 
-ModelEval reads a set of file templates (ESMValTool recipes and ESMValTool
+ClimateEval reads a set of file templates (ESMValTool recipes and ESMValTool
 configuration) and fills these with information from the simulation that will
 be evaluated. If no further options are specified, a set of default recipes
-with default settings are run. If ModelEval is run as a standalone script, one
+with default settings are run. If ClimateEval is run as a standalone script, one
 [Slurm](https://slurm.schedmd.com/) job per recipe is launched. If ModelEval
 is run within an `sbatch` script or `salloc` session, one job step per recipe
 is created. The following `sbatch` script can be used to submit a job on a
@@ -85,16 +85,16 @@ details on this):
 #SBATCH --partition=compute
 #SBATCH --time=03:00:00
 
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --srun_options='{"--cpus-per-task": 16, "--mem-per-cpu": "1940M"}'
 ```
 
-ModelEval is highly customizable. For example, the desired time range and
+ClimateEval is highly customizable. For example, the desired time range and
 frequency of the input data, as well as a flag to publish a summary HTML on a
 **public** website can be passed with
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --timerange='20070101/20080101' --frequency=mon --publish_html=True
 ```
 
@@ -112,7 +112,7 @@ To only run a subset of available recipes, you can specify `--tags` when
 running ModelEval:
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml --tags=timeseries,maps
+ClimateEval path/to/my_simulation --model_config=my_model.yml --tags=timeseries,maps
 ```
 
 An overview of all tags available in the default recipe templates is given
@@ -121,12 +121,12 @@ An overview of all tags available in the default recipe templates is given
 For more information on this and a list of all options, run
 
 ```bash
-modeleval -- --help
+ClimateEval -- --help
 ```
 
 or have a look at the section on [Customization](#customization).
 
-Installing ModelEval also provides the command line tools `plots2pdf` (create
+Installing ClimateEval also provides the command line tools `plots2pdf` (create
 summary PDF for arbitrary ESMValTool output) and `publish_html` (publish
 summary HTML on public website for arbitrary ESMValTool output). For more
 information on them, run
@@ -140,7 +140,7 @@ publish_html -- --help
 
 To evaluate output from any ESM, create a YAML file describing your model's
 output conventions. Example configuration files for several models are provided
-in [`modeleval/model_configs/`](modeleval/model_configs/):
+in [`ClimateEval/model_configs/`](ClimateEval/model_configs/):
 
 | File | Model |
 |------|-------|
@@ -185,7 +185,7 @@ without any extra setup.
 Run with your model config:
 
 ```bash
-modeleval path/to/my_simulation --model_config=/path/to/my_model.yml
+ClimateEval path/to/my_simulation --model_config=/path/to/my_model.yml
 ```
 
 ## Example Results
@@ -217,16 +217,22 @@ module use -a /work/bd1179/modulefiles
 module load iconeval
 ```
 
-Add these lines to your shell configuration file if you use ModelEval regularly.
+Add these lines to your shell configuration file if you use ClimateEval regularly.
 [This file](doc/setup_module.md) describes how the ICONEval module is set up.
 
 ### Installation from Source (Development Installation)
 
 Installation from source is described [here](doc/install_from_source.md).
 
+## Workflow
+
+A detailed description of the ClimateEval workflow, CF-compliance handling, and
+how to add support for a new model or grid type can be found
+[here](doc/workflow.md).
+
 ## Customization
 
-ModelEval is highly customizable. Detailed information on this can be found
+ClimateEval is highly customizable. Detailed information on this can be found
 [here](doc/customization.md).
 
 ## ICON Output Format

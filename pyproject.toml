@@ -1,5 +1,5 @@
 [project]
-name = "modeleval"
+name = "ClimateEval"
 version = "1.0.0"
 description = "Convenient evaluation of Earth System Model output with ESMValTool"
 authors = [
@@ -42,17 +42,17 @@ develop = [
 ]
 
 [project.scripts]
-modeleval = "modeleval.main:main"
-# Backward compatibility: keep iconeval as an alias
-iconeval = "modeleval.main:main"
-plots2pdf = "modeleval.output_handling.plots2pdf:main"
-publish_html = "modeleval.output_handling.publish_html:main"
+ClimateEval = "ClimateEval.main:main"
+# Backward compatibility: keep modeleval and iconeval as aliases
+iconeval = "iconeval.main:main"
+plots2pdf = "ClimateEval.output_handling.plots2pdf:main"
+publish_html = "ClimateEval.output_handling.publish_html:main"
 
 [tool.setuptools]
-packages = ['modeleval', 'modeleval.output_handling']
+packages = ['ClimateEval', 'ClimateEval.output_handling']
 
 [tool.setuptools.package-data]
-modeleval = [
+ClimateEval = [
     "esmvaltool_config_template.yml",
     "recipe_templates/*.yml",
     "more_recipe_templates/*.yml",

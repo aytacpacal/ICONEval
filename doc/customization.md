@@ -2,7 +2,7 @@
 
 # Customization
 
-To evaluate model simulation output, ModelEval reads [ESMValTool recipe
+To evaluate model simulation output, ClimateEval reads [ESMValTool recipe
 templates](#esmvaltool-recipes). These templates are then filled with
 information from the simulation that will be evaluated. This is done via
 placeholders (`{{placeholder}}`) in the files.
@@ -12,20 +12,20 @@ Individual ESMValTool runs can be further customized with additional
 options](#slurm-options-for-jobjob-step-submission) and/or [Dask
 options](#dask-options). Finally, [additional command line
 options](#additional-command-line-options) allow an even further customization
-of ModelEval.
+of ClimateEval.
 
 > [!NOTE]
-> The primary command is `modeleval`. The `iconeval` command is kept as a
-> backward-compatible alias. All examples below use `modeleval`.
+> The primary command is `ClimateEval`. The `iconeval` command is kept as a
+> backward-compatible alias. All examples below use `ClimateEval`.
 
 ## ESMValTool Recipes
 
 By default, recipe templates are read from the [recipe template
-directory](https://github.com/EyringMLClimateGroup/ICONEval/tree/main/modeleval/recipe_templates)
+directory](https://github.com/EyringMLClimateGroup/ICONEval/tree/main/ClimateEval/recipe_templates)
 in the installation directory of this tool. To only run a custom recipe, use
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --recipe_templates=/path/to/recipe_1.yml
 ```
 
@@ -34,21 +34,21 @@ Make sure that all recipe names start with `recipe_`.
 Unix-style wildcards are supported:
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --recipe_templates=/path/to/recipe_*.yml
 ```
 
 To run multiple recipe (patterns), use the syntax:
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --recipe_templates='["/path/to/recipe_1_*.yml", "/path/to/recipe_2.yml"]'
 ```
 
 To run custom recipes in addition to the default recipes, use
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --recipe_templates='["/path/to/recipe_1_*.yml", "/path/to/recipe_2.yml"]' \
     --always_use_default_recipe_templates=True
 ```
@@ -127,8 +127,8 @@ More information on these settings is given in the following three sections.
 
 By default, an ESMValTool configuration template is read from the [installation
 directory of this
-tool](https://github.com/EyringMLClimateGroup/ICONEval/blob/main/modeleval/esmvaltool_config_template.yml)
-and filled with information from the current ModelEval run.
+tool](https://github.com/EyringMLClimateGroup/ICONEval/blob/main/ClimateEval/esmvaltool_config_template.yml)
+and filled with information from the current ClimateEval run.
 
 The configuration options `dask`, `output_dir`, and `rootpath` must not be
 overwritten in the [custom ESMValTool
@@ -140,7 +140,7 @@ Additional ESMValTool configuration options can also be specified via the
 command line, e.g.,
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --esmvaltool_options='{"--max_parallel_tasks": 1}'
 ```
 
@@ -152,7 +152,7 @@ located in a dedicated configuration directory (e.g., `/path/to/config/dir`),
 which can then be specified via
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --esmvaltool_options='{"--config_dir": "/path/to/config/dir"}'
 ```
 
@@ -169,7 +169,7 @@ specified in the recipe templates, e.g.,
 This is particularly useful if a specific recipe needs special requirements
 like a reduced number of parallel processes.
 
-If the optional ModelEval command line argument
+If the optional ClimateEval command line argument
 `--ignore_recipe_esmvaltool_options=True` is used, these recipe-specific
 ESMValTool configuration options are ignored for all recipes.
 
@@ -180,17 +180,17 @@ More information and all possible ESMValTool configuration options are given
 
 ## Slurm options for job/job step submission
 
-ModelEval uses [`srun`](https://slurm.schedmd.com/srun.html) to submit jobs or
-job steps depending on how ModelEval is started:
+ClimateEval uses [`srun`](https://slurm.schedmd.com/srun.html) to submit jobs or
+job steps depending on how ClimateEval is started:
 
-1. If ModelEval is run within an
+1. If ClimateEval is run within an
    [`sbatch`](https://slurm.schedmd.com/sbatch.html) script or
    [`salloc`](https://slurm.schedmd.com/salloc.html), one job step per recipe
    is submitted. In this case, the only default option for `srun` is
    `--ntasks=1` (to ensure that each recipe is only run once). All other
    options are inherited from the `sbatch` script/`salloc` session.
 
-1. If ModelEval is run as a standalone script, one job per recipe is submitted.
+1. If ClimateEval is run as a standalone script, one job per recipe is submitted.
    In this case, the default `srun` options for each job are:
 
    ```bash
@@ -203,15 +203,15 @@ job steps depending on how ModelEval is started:
    ```
 
 The account that is charged for the job can be specified by the `--account`
-command line option given to ModelEval. By default, this account is either
-inherited from `sbatch`/`salloc` (if ModelEval is run within an `sbatch`
-script/`salloc` session), or set to `'bd1179'` (if ModelEval is run as a
+command line option given to ClimateEval. By default, this account is either
+inherited from `sbatch`/`salloc` (if ClimateEval is run within an `sbatch`
+script/`salloc` session), or set to `'bd1179'` (if ClimateEval is run as a
 standalone script).
 
 Additional `srun` options can also be specified via the command line, e.g.,
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --srun_options='{"--mem": "16G"}'
 ```
 
@@ -233,9 +233,9 @@ The above will reserve an entire compute node for 3 hours, which is
 particularly useful for heavy recipes. Make sure to adapt the [Dask
 options](#dask-options) accordingly.
 
-If the optional ModelEval command line argument
+If the optional ClimateEval command line argument
 `--ignore_recipe_srun_options=True` is used, these recipe-specific `srun`
-options are ignored for all recipes. This might be useful if ModelEval is run
+options are ignored for all recipes. This might be useful if ClimateEval is run
 within an `sbatch` script/`salloc` session to ensure that the recipe-specific
 settings are not conflicting with the `sbatch`/`salloc` options.
 
@@ -262,7 +262,7 @@ This will use a
 Additional Dask options can also be specified via the command line, e.g.,
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml \
+ClimateEval path/to/my_simulation --model_config=my_model.yml \
     --dask_options='{"--memory_limit": "8GB"}'
 ```
 
@@ -281,11 +281,11 @@ section above). For example, the custom Dask settings given here require a
 total memory of 32 workers times 8 GB = 256 GB. When using a
 [`SLURMCluster`](https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.SLURMCluster.html)
 with `type: dask_jobqueue.SLURMCluster`, the account specified by the command
-line argument `--account` given to ModelEval is charged. If a different `type`
+line argument `--account` given to ClimateEval is charged. If a different `type`
 than `distributed.LocalCluster` is used, the default options given above are
 ignored.
 
-If the optional ModelEval command line argument
+If the optional ClimateEval command line argument
 `--ignore_recipe_dask_options=True` is used, these recipe-specific Dask options
 are ignored for all recipes.
 
@@ -293,10 +293,10 @@ Recipe-specific options take priority over options specified via command line.
 
 An overview of ESMValTool's Dask configuration is given
 [here](https://docs.esmvaltool.org/projects/ESMValCore/en/latest/quickstart/configure.html#dask-configuration).
-Options given to ModelEval are interpreted as `cluster` keyword arguments.
+Options given to ClimateEval are interpreted as `cluster` keyword arguments.
 
 To use the default (thread-based) Dask scheduler instead of a distributed
-scheduler, run ModelEval with the command line argument `--dask=False`.
+scheduler, run ClimateEval with the command line argument `--dask=False`.
 
 ## Tags
 
@@ -305,7 +305,7 @@ tags is given [here](tags.md). To only run a subset of recipes associated with
 certain tags, use
 
 ```bash
-modeleval path/to/my_simulation --model_config=my_model.yml --tags=timeseries,maps
+ClimateEval path/to/my_simulation --model_config=my_model.yml --tags=timeseries,maps
 ```
 
 This will run all timeseries and maps recipes.
@@ -323,22 +323,22 @@ tags using the syntax
 - `--model_config`: Path to a YAML file describing the model's output
   conventions (project name, dataset name, file naming patterns, directory
   structure). If not given, ICON auto-detection is used for backward
-  compatibility. See [`modeleval/model_configs/`](../modeleval/model_configs/)
+  compatibility. See [`ClimateEval/model_configs/`](../ClimateEval/model_configs/)
   for examples.
 - `--publish_html`: Enable/Disable publishing of an ESMValTool summary HTML on
   a **public** website using DKRZ's
   [Python-swiftclient](https://docs.dkrz.de/doc/datastorage/swift/python-swiftclient.html)
   (default: `False`). To delete existing websites, login to the [swift
   web client](https://swiftbrowser.dkrz.de/) and delete the corresponding
-  directories in the *modeleval* container.
+  directories in the *ClimateEval* container.
 - `--html_name`: Name that is used for the URL of the ESMValTool summary HTML;
   if `None`, use the name of the output directory (default: `None`). Use this
   to get a consistent URL (this will potentially overwrite existing data!).
   Ignored if `--publish_html=False`.
 - `--create_pdfs`: Enable/Disable creation of summary PDFs (default: `False`).
-- `--log_level`: Log level for ModelEval (default: `info`).
-- `--output_dir`: Output directory for ModelEval (default: `./output_modeleval`).
-- `--background`: Terminate ModelEval after submitting all jobs/job steps
+- `--log_level`: Log level for ClimateEval (default: `info`).
+- `--output_dir`: Output directory for ClimateEval (default: `./output_modeleval`).
+- `--background`: Terminate ClimateEval after submitting all jobs/job steps
   (default: `False`). Neither summary HTMLs nor PDFs can be published/written
   in this mode.
 - `--esmvaltool_executable`: Path to ESMValTool executable (default:

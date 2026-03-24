@@ -12,8 +12,8 @@ import swiftclient
 from loguru import logger
 from swiftclient.service import SwiftError, SwiftService, SwiftUploadObject
 
-from modeleval._logging import configure_logging
-from modeleval.output_handling._summarize import summarize
+from ClimateEval._logging import configure_logging
+from ClimateEval.output_handling._summarize import summarize
 
 logger = logger.opt(colors=True)
 
@@ -171,7 +171,7 @@ def _publish_html(
 ) -> str:
     """Publish ESMValTool summary HTML using swift."""
     if container_name is None:
-        container_name = "modeleval"
+        container_name = "ClimateEval"
     if dir_name is None:
         dir_name = esmvaltool_output_dir.name
 

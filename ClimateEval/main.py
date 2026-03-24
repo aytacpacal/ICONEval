@@ -10,41 +10,41 @@ from typing import TYPE_CHECKING
 import fire
 from loguru import logger
 
-import modeleval
-from modeleval._dependencies import (
+import ClimateEval
+from ClimateEval._dependencies import (
     latex_is_available,
     verify_esmvaltool_installation,
     verify_slurm_installation,
 )
-from modeleval._io_handler import ModelEvalIOHandler
-from modeleval._logging import configure_logging
-from modeleval.output_handling._summarize import (
+from ClimateEval._io_handler import ClimateEvalIOHandler
+from ClimateEval._logging import configure_logging
+from ClimateEval.output_handling._summarize import (
     get_html_description,
     summarize,
     summarize_portable,
 )
-from modeleval.output_handling.plots2pdf import plots2pdf
-from modeleval.output_handling.publish_html import publish_esmvaltool_html
+from ClimateEval.output_handling.plots2pdf import plots2pdf
+from ClimateEval.output_handling.publish_html import publish_esmvaltool_html
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
     from pathlib import Path
 
-    from modeleval._job import Job
-    from modeleval._typing import FacetType
+    from ClimateEval._job import Job
+    from ClimateEval._typing import FacetType
 
 logger = logger.opt(colors=True)
 
 HEADER = r"""
--------------------------------------------------
-     __  __           _      _ _____            _
-    |  \/  | ___   __| | ___| | ____|_   ____ _| |
-    | |\/| |/ _ \ / _` |/ _ \ |  _| \ \ / / _` | |
-    | |  | | (_) | (_| |  __/ | |___ \ V / (_| | |
-    |_|  |_|\___/ \__,_|\___|_|_____| \_/ \__,_|_|
--------------------------------------------------
+----------------------------------------------------------
+     ____ _ _                 _       _____            _
+    / ___| (_)_ __ ___   __ _| |_ ___| ____|_   ____ _| |
+   | |   | | | '_ ` _ \ / _` | __/ _ \  _| \ \ / / _` | |
+   | |___| | | | | | | | (_| | ||  __/ |___ \ V / (_| | |
+    \____|_|_|_| |_| |_|\__,_|\__\___|_____| \_/ \__,_|_|
+----------------------------------------------------------
   ESM output evaluation with ESMValTool
--------------------------------------------------
+----------------------------------------------------------
 """
 TIMES: dict[str, datetime] = {}
 
@@ -116,32 +116,32 @@ def model_evaluation(
         To run multiple recipe (patterns), use the syntax
         `--recipe_templates='["/path/to/recipe_1.yml",
         "/path/to/recipe_2.yml"]'`. If `None`, run all default recipe templates
-        available in the installation/repository directory of ModelEval. Make
+        available in the installation/repository directory of ClimateEval. Make
         sure that all recipe template names start with `recipe_`.
     always_use_default_recipe_templates:
         If `True`, always run all default recipe templates available in the
-        installation/repository directory of ModelEval in addition to the ones
+        installation/repository directory of ClimateEval in addition to the ones
         specified by `--recipe_templates`. If `False`, only run the recipes
         specified by `--recipe_templates`. If `--recipe_templates=None`, the
         default recipe templates will always be run.
     log_level:
         Log level. Must be one of `debug`, `info`, `warning`, `error`.
     log_file:
-        File where ModelEval debug output is logged. If `None`, do not log to a
+        File where ClimateEval debug output is logged. If `None`, do not log to a
         file. New messages are attached to existing files.
     output_dir:
-        Output directory where the output of ModelEval will be stored. If
+        Output directory where the output of ClimateEval will be stored. If
         `None`, use the folder `output_modeleval` in the current working
         directory. If the directory does not exist yet, it will automatically
-        be created. Output from individual ModelEval runs is not stored directly
+        be created. Output from individual ClimateEval runs is not stored directly
         in the `--output_dir`, but rather in a subdirectory whose name is
         determined by the option `--html_name`.
     account:
         Account that is charged for the Slurm jobs. By default, use account
-        that is used for `sbatch`/`salloc` (if ModelEval is run within `sbatch`
+        that is used for `sbatch`/`salloc` (if ClimateEval is run within `sbatch`
         script or `salloc` session), or `'bd1179'` otherwise.
     background:
-        Terminate ModelEval after submitting all jobs/job steps. Neither
+        Terminate ClimateEval after submitting all jobs/job steps. Neither
         summary HTMLs nor PDFs can be published/written in this mode.
     dask:
         If `True`, use Dask distributed scheduler when running ESMValTool. If
@@ -203,8 +203,8 @@ def model_evaluation(
 
     # Initialize tool
     configure_logging(log_level, log_file=log_file)
-    logger.info("Starting ModelEval")
-    logger.info(f"ModelEval version: {modeleval.__version__}")
+    logger.info("Starting ClimateEval")
+    logger.info(f"ClimateEval version: {ClimateEval.__version__}")
     logger.info(f"Debug log: <cyan>{log_file}</cyan>")
     logger.info("")
 
@@ -266,7 +266,7 @@ def model_evaluation(
 
     # Basic setup of IO directories and files
     TIMES["start_setup"] = datetime.now(UTC)
-    io_handler = ModelEvalIOHandler(
+    io_handler = ClimateEvalIOHandler(
         input_dirs, output_dir, html_name, model_config=model_config
     )
     TIMES["end_setup"] = datetime.now(UTC)
@@ -298,9 +298,9 @@ def model_evaluation(
     _run_jobs(jobs, background=background)
     if background:
         TIMES["end"] = datetime.now(UTC)
-        logger.info("Ending ModelEval")
+        logger.info("Ending ClimateEval")
         logger.info(
-            f"Time for running ModelEval was {TIMES['end'] - TIMES['start']}",
+            f"Time for running ClimateEval was {TIMES['end'] - TIMES['start']}",
         )
         return
 
@@ -325,13 +325,13 @@ def model_evaluation(
 
     # Print summary
     TIMES["end"] = datetime.now(UTC)
-    logger.info("Ending ModelEval")
+    logger.info("Ending ClimateEval")
     logger.info(
-        f"Time for running ModelEval was {TIMES['end'] - TIMES['start']}",
+        f"Time for running ClimateEval was {TIMES['end'] - TIMES['start']}",
     )
 
 
-def _create_pdfs(io_handler: ModelEvalIOHandler, jobs: list[Job]) -> None:
+def _create_pdfs(io_handler: ClimateEvalIOHandler, jobs: list[Job]) -> None:
     """Create PDFs."""
     TIMES["start_pdfs"] = datetime.now(UTC)
     logger.info("PDF output:")
@@ -356,14 +356,14 @@ def _create_pdfs(io_handler: ModelEvalIOHandler, jobs: list[Job]) -> None:
     logger.info("")
 
 
-def _create_summary_html(io_handler: ModelEvalIOHandler) -> None:
+def _create_summary_html(io_handler: ClimateEvalIOHandler) -> None:
     """Create summary HTML."""
     description = get_html_description(io_handler, TIMES["start"])
     summarize(io_handler.output_dir_esmvaltool, description=description)
 
 
 def _publish_html(
-    io_handler: ModelEvalIOHandler,
+    io_handler: ClimateEvalIOHandler,
     html_name: str | None,
 ) -> None:
     """Publish HTML."""

@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from modeleval._config import ESMValToolConfig
-    from modeleval._recipe import Recipe
-    from modeleval._typing import OptionValueType
+    from ClimateEval._config import ESMValToolConfig
+    from ClimateEval._recipe import Recipe
+    from ClimateEval._typing import OptionValueType
 
 from loguru import logger
 
@@ -126,7 +126,7 @@ class Job:
             "--ntasks": 1,
         }
 
-        # Specify defaults if ModelEval is not run within sbatch script/salloc
+        # Specify defaults if ClimateEval is not run within sbatch script/salloc
         # session. Otherwise, do not specify anything here so that srun
         # automatically inherits the sbatch/salloc options. Always use just 1
         # task by default (we do not want to run recipes multiple times)

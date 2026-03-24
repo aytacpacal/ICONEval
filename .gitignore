@@ -1,7 +1,8 @@
 # Output directory created by this tool
 output_iconeval/
 output_modeleval
-
+output_climateeval/
+output_ClimateEval/
 #JCM output
 test_jcm/
 

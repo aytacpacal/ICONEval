@@ -1,7 +1,7 @@
 # Model configuration for ICON simulations.
 #
 # This replicates the default auto-detection behavior of the original
-# ICONEval. You typically do NOT need this file since ModelEval will
+# ICONEval. You typically do NOT need this file since ClimateEval will
 # auto-detect ICON simulations when no --model_config is specified.
 #
 # Usage:

@@ -1,4 +1,4 @@
-"""Module that manage dependencies of ModelEval."""
+"""Module that manage dependencies of ClimateEval."""
 
 from __future__ import annotations
 

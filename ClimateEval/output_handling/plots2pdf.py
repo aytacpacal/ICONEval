@@ -22,7 +22,7 @@ from pylatex import (
 )
 from pylatex.base_classes import CommandBase
 
-from modeleval._logging import configure_logging
+from ClimateEval._logging import configure_logging
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
