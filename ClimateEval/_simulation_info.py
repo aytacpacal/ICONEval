@@ -97,8 +97,12 @@ class SimulationInfo:
                 model_config=model_config,
             )
 
-        # Fallback: ICON auto-detection (backward compatibility)
-        return cls._from_path_icon(path, date, exp, owner)
+        # Check if this looks like ICON output (Tier 2: ICON backward compat)
+        if cls._is_icon_output(path):
+            return cls._from_path_icon(path, date, exp, owner)
+
+        # Tier 3: auto-discovery for unknown models
+        return cls._from_path_auto_discover(path, date, exp, owner)
 
     @classmethod
     def _from_path_icon(
@@ -137,6 +141,73 @@ class SimulationInfo:
             owner=owner,
             path=path,
             model_config=None,
+        )
+
+    @staticmethod
+    def _is_icon_output(path: Path) -> bool:
+        """Check if directory looks like ICON output."""
+        # ICON output has icon_grid_* files OR NAMELIST_* with ICON patterns
+        has_icon_grid = any(path.glob("icon_grid_*"))
+        has_icon_namelist = (path / "NAMELIST_ICON_output_atm").is_file()
+        has_icon_files = any(path.glob("*_var_*.nc")) or any(path.glob("*_atm_*.nc"))
+        return has_icon_grid or has_icon_namelist or has_icon_files
+
+    @classmethod
+    def _from_path_auto_discover(
+        cls,
+        path: Path,
+        date: str,
+        exp: str,
+        owner: str,
+    ) -> SimulationInfo:
+        """Auto-discover model config for unknown model output (Tier 3)."""
+        from loguru import logger as _logger
+
+        _logger = _logger.opt(colors=True)
+
+        try:
+            from ClimateEval._data_discovery import discover_model_config
+
+            _logger.info(
+                f"No model config provided and not ICON output detected. "
+                f"Auto-discovering model configuration for <magenta>{exp}</magenta>..."
+            )
+            auto_config = discover_model_config(path, exp)
+            _logger.info(
+                f"Auto-discovered: project=<green>{auto_config.project}</green>, "
+                f"dataset=<green>{auto_config.dataset}</green>, "
+                f"grid=<green>{auto_config.grid_info}</green>"
+            )
+        except Exception as e:
+            from loguru import logger as _logger2
+
+            _logger2.warning(
+                f"Auto-discovery failed for {path}: {e}. "
+                "Falling back to ICON auto-detection."
+            )
+            return cls._from_path_icon(path, date, exp, owner)
+
+        grid_info = auto_config.grid_info
+        guessed_facets: dict[str, FacetType] = {
+            "dataset": auto_config.dataset,
+            "exp": exp,
+            "project": auto_config.project,
+        }
+        guessed_facets.update(auto_config.extra_facets)
+
+        namelist_files = list(path.glob("NAMELIST_*")) + list(
+            path.glob("namelist_*")
+        )
+
+        return cls(
+            date=date,
+            exp=exp,
+            grid_info=grid_info,
+            guessed_facets=guessed_facets,
+            namelist_files=namelist_files,
+            owner=owner,
+            path=path,
+            model_config=auto_config,
         )
 
     @staticmethod

@@ -194,6 +194,9 @@ class ClimateEvalIOHandler:
             always_use_default_recipe_templates=always_use_default_recipe_templates,
         )
 
+        # Filter recipes by variable availability if auto-discovery found vars
+        recipe_templates = self._filter_recipes_by_available_vars(recipe_templates)
+
         logger.debug(
             f"ESMValTool configuration template: {esmvaltool_config_template.path}",
         )
@@ -400,6 +403,54 @@ class ClimateEvalIOHandler:
         logger.debug("")
 
         return recipe_templates
+
+    def _filter_recipes_by_available_vars(
+        self, recipe_templates: list[RecipeTemplate]
+    ) -> list[RecipeTemplate]:
+        """Filter recipe templates based on variables available in input data.
+
+        Only active when simulations have auto-discovered variable information.
+        """
+        # Collect discovered CMIP6 variable names from all simulations
+        discovered_vars: set[str] = set()
+        for sim in self.simulations_info:
+            mc = sim.model_config
+            if mc is not None and hasattr(mc, "discovered_vars") and mc.discovered_vars:
+                discovered_vars.update(mc.discovered_vars)
+
+        if not discovered_vars:
+            return recipe_templates
+
+        # Filter using RecipeVariableChecker
+        try:
+            from ClimateEval._variable_mapping import RecipeVariableChecker
+        except ImportError:
+            return recipe_templates
+
+        checker = RecipeVariableChecker()
+        available = list(discovered_vars)
+        compatible_paths = checker.filter_compatible_recipes(
+            [rt.path for rt in recipe_templates], available
+        )
+        compatible_set = set(compatible_paths)
+
+        filtered = [rt for rt in recipe_templates if rt.path in compatible_set]
+
+        if len(filtered) < len(recipe_templates):
+            skipped = len(recipe_templates) - len(filtered)
+            logger.info(
+                f"Skipped {skipped} recipe(s) due to missing variables "
+                f"(available: {sorted(available)})"
+            )
+
+        if not filtered:
+            logger.warning(
+                "No recipes are compatible with the available variables. "
+                "Check your input data or provide a model config YAML."
+            )
+            return recipe_templates  # Return all rather than fail
+
+        return filtered
 
     @staticmethod
     def _resolve_globs(paths: Iterable[Path]) -> list[Path]:

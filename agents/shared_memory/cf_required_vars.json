@@ -1,0 +1,54 @@
+{
+  "_comment": "Variables required per recipe tag. Maintained by variable-validator agent.",
+  "_note": "These are CMIP6 short_names. The system checks if input data can provide them (directly or via mapping).",
+  "maps": {
+    "required": ["tas"],
+    "optional": ["pr", "psl", "uas", "vas", "clt", "rsds", "rlds"],
+    "description": "Basic atmosphere maps"
+  },
+  "timeseries": {
+    "required": ["tas"],
+    "optional": ["pr", "psl", "ts"],
+    "description": "Global mean time series"
+  },
+  "zonal_mean": {
+    "required": ["ta"],
+    "optional": ["ua", "va", "hus", "hur"],
+    "description": "Zonal mean cross sections"
+  },
+  "clouds": {
+    "required": ["clt"],
+    "optional": ["cl", "clwvi", "clivi"],
+    "description": "Cloud fraction diagnostics"
+  },
+  "radiation": {
+    "required": ["rsdt", "rsut", "rlut"],
+    "optional": ["rsds", "rlds", "rsus", "rlus"],
+    "description": "Top-of-atmosphere and surface radiation"
+  },
+  "precipitation": {
+    "required": ["pr"],
+    "optional": ["prc", "evspsbl"],
+    "description": "Precipitation diagnostics"
+  },
+  "ocean": {
+    "required": ["thetao", "so"],
+    "optional": ["tos", "sos", "zos", "mlotst"],
+    "description": "Ocean temperature, salinity, SSH"
+  },
+  "sea_ice": {
+    "required": ["siconc"],
+    "optional": ["sithick", "sisnthick"],
+    "description": "Sea ice concentration and thickness"
+  },
+  "energy_budget": {
+    "required": ["rsdt", "rsut", "rlut", "rsds", "rlds"],
+    "optional": ["rsus", "rlus", "hfls", "hfss"],
+    "description": "Energy budget closure"
+  },
+  "basics": {
+    "required": ["tas"],
+    "optional": ["pr", "psl", "ts"],
+    "description": "Basic climate diagnostics"
+  }
+}

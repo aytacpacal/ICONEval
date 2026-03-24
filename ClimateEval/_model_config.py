@@ -72,6 +72,8 @@ class ModelConfig:
     data_sources: list[DataSource] = field(default_factory=list)
     extra_facets: dict[str, FacetType] = field(default_factory=dict)
     grid_info: str = "unknown"
+    discovered_vars: list[str] = field(default_factory=list)
+    """CMIP6 variable names available in this simulation (from auto-discovery)."""
 
     @classmethod
     def from_yaml(cls, path: Path) -> ModelConfig:
