@@ -52,6 +52,7 @@ Tier 3 (NEW): Unknown model output
 6. **Frequency detection**: Infer from time coordinate spacing
 7. **Recipe filtering**: Skip recipes silently (with warning) if vars missing
 8. **raw_name injection**: Add raw_name/raw_units to recipe dataset entries
+9. 
 
 ## Test Cases
 
